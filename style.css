@@ -1,0 +1,951 @@
+/* =============================================
+   CONCEPT BUBBLE — Interactive Story Styles
+   ============================================= */
+
+/* CSS Custom Properties (Design Tokens) */
+:root {
+    --amber: #FFA500;
+    --amber-light: #FFD080;
+    --purple: #8F24F5;
+    --purple-light: #B76EFF;
+    --black: #0D0D0D;
+    --white: #FFFFFF;
+    --gray-dark: #1a1a1a;
+    --gray-medium: #2a2a2a;
+    --gray-light: #4a4a4a;
+
+    /* Easing functions for organic motion */
+    --ease-elastic: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+    --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Reset & Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--black);
+    color: var(--white);
+    overflow-x: hidden;
+    cursor: none;
+}
+
+/* Custom Cursor */
+#cursor-glow {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, rgba(255,165,0,0.8) 0%, rgba(255,165,0,0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 10000;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s var(--ease-soft), height 0.2s var(--ease-soft);
+    mix-blend-mode: screen;
+}
+
+#cursor-glow.painting {
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255,165,0,1) 0%, rgba(255,165,0,0.3) 50%, rgba(255,165,0,0) 70%);
+}
+
+#cursor-glow.dragging {
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle, rgba(143,36,245,0.6) 0%, rgba(143,36,245,0) 70%);
+}
+
+/* Progress Bar */
+#progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--amber), var(--purple));
+    width: 0%;
+    z-index: 9999;
+    transition: width 0.1s linear;
+}
+
+/* Scroll Container */
+#scroll-container {
+    width: 100%;
+}
+
+/* =============================================
+   SCENES — Common Styles
+   ============================================= */
+
+.scene {
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.8s var(--ease-soft);
+    overflow: hidden;
+}
+
+.scene.active {
+    opacity: 1;
+}
+
+.scene-content {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Scroll Hint */
+.scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    opacity: 0.6;
+    animation: fadeInUp 1s var(--ease-soft) 2s both;
+}
+
+.scroll-hint span {
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: lowercase;
+}
+
+.scroll-arrow {
+    width: 20px;
+    height: 20px;
+    margin: 10px auto 0;
+    border-right: 2px solid var(--white);
+    border-bottom: 2px solid var(--white);
+    transform: rotate(45deg);
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: rotate(45deg) translateY(0); }
+    40% { transform: rotate(45deg) translateY(10px); }
+    60% { transform: rotate(45deg) translateY(5px); }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 0.6;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* =============================================
+   SCENE 1 — The Blank Canvas (Friction)
+   ============================================= */
+
+#scene-1 {
+    background: radial-gradient(ellipse at center, #1a1a2e 0%, var(--black) 100%);
+}
+
+/* Girl Character Container */
+#girl-container {
+    position: absolute;
+    left: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
+#girl {
+    width: 200px;
+    height: 350px;
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.5));
+}
+
+/* Hair Animation */
+.hair {
+    transform-origin: center top;
+    animation: hairFloat 4s ease-in-out infinite;
+}
+
+.hair-back {
+    animation-delay: -0.5s;
+}
+
+.hair-side-left {
+    animation: hairFloatLeft 3.5s ease-in-out infinite;
+}
+
+.hair-side-right {
+    animation: hairFloatRight 3.5s ease-in-out infinite;
+    animation-delay: -0.3s;
+}
+
+@keyframes hairFloat {
+    0%, 100% { transform: rotate(0deg) scaleY(1); }
+    50% { transform: rotate(1deg) scaleY(1.02); }
+}
+
+@keyframes hairFloatLeft {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(-3deg); }
+}
+
+@keyframes hairFloatRight {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(3deg); }
+}
+
+/* Arm subtle movement */
+.arm {
+    transform-origin: top;
+}
+
+.arm-right {
+    animation: armPaint 3s ease-in-out infinite;
+}
+
+@keyframes armPaint {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(5deg); }
+}
+
+/* Easel and Canvas */
+#easel-container {
+    position: absolute;
+    right: 20%;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 5;
+}
+
+#easel {
+    position: relative;
+    width: 320px;
+    height: 300px;
+}
+
+#easel-leg-left,
+#easel-leg-right {
+    position: absolute;
+    width: 8px;
+    height: 200px;
+    background: #5a4a3a;
+    bottom: -100px;
+    border-radius: 4px;
+}
+
+#easel-leg-left {
+    left: 40px;
+    transform: rotate(-10deg);
+}
+
+#easel-leg-right {
+    right: 40px;
+    transform: rotate(10deg);
+}
+
+#easel-shelf {
+    position: absolute;
+    width: 280px;
+    height: 15px;
+    background: #6a5a4a;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 3px;
+}
+
+#preview-canvas {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--white);
+    border: 8px solid #8a7a6a;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    cursor: crosshair;
+}
+
+#canvas-hint {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    opacity: 0.5;
+    white-space: nowrap;
+}
+
+/* Floating Tasks */
+#floating-tasks {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.floating-task {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    background: rgba(143, 36, 245, 0.15);
+    border: 1px solid rgba(143, 36, 245, 0.3);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--purple-light);
+    backdrop-filter: blur(5px);
+    animation: taskOrbit var(--orbit-duration, 8s) ease-in-out infinite;
+    animation-delay: var(--orbit-delay, 0s);
+    pointer-events: auto;
+    transition: transform 0.3s var(--ease-elastic), opacity 0.5s;
+    box-shadow: 0 0 20px rgba(143, 36, 245, 0.2);
+}
+
+.floating-task .icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.floating-task:hover {
+    transform: scale(1.1);
+    background: rgba(143, 36, 245, 0.25);
+}
+
+.floating-task.interfering {
+    animation: interferePulse 0.5s ease-in-out;
+    background: rgba(143, 36, 245, 0.4);
+}
+
+@keyframes taskOrbit {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(var(--orbit-x1, 30px), var(--orbit-y1, -20px)) rotate(5deg);
+    }
+    50% {
+        transform: translate(var(--orbit-x2, 0px), var(--orbit-y2, -40px)) rotate(0deg);
+    }
+    75% {
+        transform: translate(var(--orbit-x3, -30px), var(--orbit-y3, -20px)) rotate(-5deg);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+}
+
+@keyframes interferePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); box-shadow: 0 0 40px rgba(143, 36, 245, 0.6); }
+}
+
+/* Interference Layer */
+#interference-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.interference-flash {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(143, 36, 245, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: flashFade 0.5s ease-out forwards;
+    pointer-events: none;
+}
+
+@keyframes flashFade {
+    from { opacity: 1; transform: scale(0.5); }
+    to { opacity: 0; transform: scale(2); }
+}
+
+/* =============================================
+   SCENE 2 — Emergence of Bubbles
+   ============================================= */
+
+#scene-2 {
+    background: radial-gradient(ellipse at center, #1a1a3e 0%, var(--black) 100%);
+}
+
+#bubbles-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+}
+
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+        rgba(255, 255, 255, 0.3) 0%,
+        rgba(255, 255, 255, 0.1) 30%,
+        rgba(143, 36, 245, 0.05) 70%,
+        transparent 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow:
+        inset 0 0 20px rgba(255, 255, 255, 0.1),
+        0 0 30px rgba(143, 36, 245, 0.1);
+    cursor: grab;
+    transition: transform 0.3s var(--ease-elastic), box-shadow 0.3s;
+    animation: bubbleFloat 6s ease-in-out infinite;
+}
+
+.bubble:hover {
+    transform: scale(1.1);
+    box-shadow:
+        inset 0 0 30px rgba(255, 255, 255, 0.2),
+        0 0 50px rgba(255, 165, 0, 0.3);
+}
+
+.bubble.dragging {
+    cursor: grabbing;
+    animation: none;
+    transform: scale(1.15);
+    box-shadow:
+        inset 0 0 40px rgba(255, 255, 255, 0.3),
+        0 0 60px rgba(255, 165, 0, 0.5);
+}
+
+.bubble.captured {
+    background: radial-gradient(circle at 30% 30%,
+        rgba(255, 255, 255, 0.4) 0%,
+        rgba(255, 165, 0, 0.2) 30%,
+        rgba(143, 36, 245, 0.1) 70%,
+        transparent 100%);
+    animation: bubbleFloatCaptured 8s ease-in-out infinite;
+}
+
+/* Neurons inside bubbles */
+.bubble-neurons {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s;
+}
+
+.bubble.captured .bubble-neurons {
+    opacity: 1;
+}
+
+.neuron-dot {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--amber);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--amber);
+    animation: neuronPulse 2s ease-in-out infinite;
+}
+
+.neuron-line {
+    position: absolute;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 165, 0, 0.5), transparent);
+    transform-origin: left center;
+}
+
+@keyframes bubbleFloat {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    33% { transform: translateY(-15px) rotate(2deg); }
+    66% { transform: translateY(10px) rotate(-2deg); }
+}
+
+@keyframes bubbleFloatCaptured {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-20px) scale(1.05); }
+}
+
+@keyframes neuronPulse {
+    0%, 100% { opacity: 0.6; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Detached Tasks */
+#detached-tasks {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+}
+
+.detached-task {
+    position: absolute;
+    padding: 10px 15px;
+    background: rgba(143, 36, 245, 0.2);
+    border: 1px solid rgba(143, 36, 245, 0.4);
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--purple-light);
+    animation: detachedFloat 5s ease-in-out infinite;
+    transition: all 0.5s var(--ease-elastic);
+}
+
+.detached-task.being-captured {
+    transform: scale(0.5);
+    opacity: 0;
+}
+
+@keyframes detachedFloat {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(-10px) translateX(5px); }
+    75% { transform: translateY(5px) translateX(-5px); }
+}
+
+#capture-hint {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 14px;
+    opacity: 0.5;
+    text-align: center;
+}
+
+/* Girl (smaller in scene 2) */
+#girl-small {
+    position: absolute;
+    left: 10%;
+    bottom: 10%;
+    width: 100px;
+    height: 175px;
+    background: url('data:image/svg+xml,<svg viewBox="0 0 200 350" xmlns="http://www.w3.org/2000/svg"><path d="M60 80 Q40 120 45 180 Q50 220 60 260 Q30 200 35 140 Q40 90 70 60 Z" fill="%23FFA500"/><ellipse cx="100" cy="280" rx="35" ry="50" fill="%232a2a2a"/><ellipse cx="100" cy="150" rx="50" ry="60" fill="%23f5d0c5"/><path d="M50 130 Q55 80 100 70 Q145 80 150 130 Q145 100 100 95 Q55 100 50 130 Z" fill="%23FFA500"/></svg>') center/contain no-repeat;
+    opacity: 0.6;
+    filter: blur(1px);
+}
+
+/* =============================================
+   SCENE 3 — Calm Field (Clarity)
+   ============================================= */
+
+#scene-3 {
+    background: radial-gradient(ellipse at center, #0f1a2a 0%, var(--black) 100%);
+}
+
+#neuron-canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+#peaceful-bubbles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+}
+
+.peaceful-bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%,
+        rgba(255, 255, 255, 0.2) 0%,
+        rgba(255, 165, 0, 0.1) 50%,
+        transparent 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    animation: peacefulFloat 10s ease-in-out infinite;
+    opacity: 0.7;
+}
+
+@keyframes peacefulFloat {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(-30px) translateX(20px); }
+    50% { transform: translateY(-10px) translateX(-10px); }
+    75% { transform: translateY(-40px) translateX(10px); }
+}
+
+#girl-clear {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    text-align: center;
+}
+
+#girl-calm {
+    width: 150px;
+    height: 260px;
+    margin: 0 auto;
+    background: url('data:image/svg+xml,<svg viewBox="0 0 200 350" xmlns="http://www.w3.org/2000/svg"><path d="M60 80 Q40 120 45 180 Q50 220 60 260 Q30 200 35 140 Q40 90 70 60 Z" fill="%23FFA500"/><path d="M140 80 Q160 120 155 180 Q150 220 140 260 Q170 200 165 140 Q160 90 130 60 Z" fill="%23FFA500"/><ellipse cx="100" cy="280" rx="35" ry="50" fill="%232a2a2a"/><rect x="90" y="200" width="20" height="30" fill="%23f5d0c5" rx="5"/><ellipse cx="100" cy="150" rx="50" ry="60" fill="%23f5d0c5"/><path d="M50 130 Q55 80 100 70 Q145 80 150 130 Q145 100 100 95 Q55 100 50 130 Z" fill="%23FFA500"/><ellipse cx="80" cy="145" rx="8" ry="5" fill="%230D0D0D"/><ellipse cx="120" cy="145" rx="8" ry="5" fill="%230D0D0D"/><path d="M90 175 Q100 185 110 175" stroke="%23c9918a" stroke-width="3" fill="none" stroke-linecap="round"/></svg>') center/contain no-repeat;
+    filter: drop-shadow(0 0 30px rgba(255, 165, 0, 0.3));
+}
+
+#canvas-preview-calm {
+    width: 200px;
+    height: 150px;
+    margin: 20px auto 0;
+    background: var(--white);
+    border: 5px solid #8a7a6a;
+    border-radius: 4px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.calm-text {
+    position: absolute;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    opacity: 0.8;
+    text-align: center;
+}
+
+/* =============================================
+   SCENE 4 — The Moment to Create
+   ============================================= */
+
+#scene-4 {
+    background: radial-gradient(ellipse at center, #1a1a1a 0%, var(--black) 100%);
+}
+
+#create-prompt {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 5;
+    transition: opacity 0.5s;
+}
+
+#create-prompt p {
+    font-size: 18px;
+    opacity: 0.7;
+    letter-spacing: 2px;
+}
+
+#floating-canvas-trigger {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition: transform 0.5s var(--ease-elastic);
+    z-index: 10;
+}
+
+#floating-canvas-trigger:hover {
+    transform: translate(-50%, -50%) scale(1.05);
+}
+
+#floating-canvas-trigger:hover .canvas-frame {
+    box-shadow: 0 20px 60px rgba(255, 165, 0, 0.3);
+}
+
+.canvas-frame {
+    width: 300px;
+    height: 220px;
+    background: #5a4a3a;
+    padding: 15px;
+    border-radius: 4px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+    transition: box-shadow 0.5s;
+}
+
+.canvas-surface {
+    width: 100%;
+    height: 100%;
+    background: var(--white);
+    border-radius: 2px;
+}
+
+#floating-canvas-trigger.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.8);
+}
+
+/* Painting Area */
+#painting-area {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(13, 13, 13, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.5s;
+}
+
+#painting-area.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#painting-canvas {
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+/* Color Palette */
+#color-palette {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.color-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.2s var(--ease-elastic), border-color 0.2s;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.color-btn:hover {
+    transform: scale(1.15);
+}
+
+.color-btn.active {
+    border-color: var(--white);
+    transform: scale(1.1);
+}
+
+/* Brush Controls */
+#brush-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+}
+
+#brush-size {
+    width: 150px;
+    height: 6px;
+    -webkit-appearance: none;
+    background: rgba(255,255,255,0.2);
+    border-radius: 3px;
+    outline: none;
+}
+
+#brush-size::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--amber);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(255, 165, 0, 0.5);
+    transition: transform 0.2s;
+}
+
+#brush-size::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+#clear-canvas {
+    margin-top: 20px;
+    padding: 10px 30px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: rgba(255,255,255,0.7);
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+#clear-canvas:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--amber);
+    color: var(--amber);
+}
+
+/* =============================================
+   SCENE 5 — Download & Signature
+   ============================================= */
+
+#scene-5 {
+    background: radial-gradient(ellipse at center, #1a1520 0%, var(--black) 100%);
+}
+
+#final-area {
+    text-align: center;
+    z-index: 10;
+}
+
+.final-text {
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+#final-preview {
+    width: 400px;
+    height: 300px;
+    margin: 0 auto 40px;
+    background: var(--white);
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    overflow: hidden;
+}
+
+#final-preview canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+#download-btn {
+    padding: 15px 40px;
+    background: linear-gradient(135deg, var(--amber), #ff8c00);
+    border: none;
+    border-radius: 30px;
+    color: var(--black);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.3s var(--ease-elastic), box-shadow 0.3s;
+    box-shadow: 0 10px 30px rgba(255, 165, 0, 0.3);
+}
+
+#download-btn:hover {
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 15px 40px rgba(255, 165, 0, 0.5);
+}
+
+.signature {
+    margin-top: 60px;
+    font-size: 18px;
+    font-weight: 300;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    opacity: 0.5;
+    color: var(--amber);
+}
+
+/* =============================================
+   UTILITY CLASSES
+   ============================================= */
+
+.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.fade-in {
+    animation: fadeIn 0.8s var(--ease-soft) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* =============================================
+   RESPONSIVE (Basic Desktop Focus)
+   ============================================= */
+
+@media (max-width: 1200px) {
+    #girl-container {
+        left: 10%;
+    }
+
+    #easel-container {
+        right: 10%;
+    }
+}
+
+@media (max-width: 900px) {
+    #girl-container {
+        left: 5%;
+        transform: translateY(-50%) scale(0.8);
+    }
+
+    #easel-container {
+        right: 5%;
+        transform: translateY(-50%) scale(0.8);
+    }
+
+    #painting-canvas {
+        width: 90vw;
+        max-width: 600px;
+        height: auto;
+        aspect-ratio: 4/3;
+    }
+}
+
+/* =============================================
+   ANIMATIONS FOR SCENE TRANSITIONS
+   ============================================= */
+
+.scene-enter {
+    animation: sceneEnter 1s var(--ease-soft) forwards;
+}
+
+@keyframes sceneEnter {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Particle effects */
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: var(--amber);
+    border-radius: 50%;
+    pointer-events: none;
+    animation: particleFade 1s ease-out forwards;
+}
+
+@keyframes particleFade {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0) translateY(-50px);
+    }
+}
