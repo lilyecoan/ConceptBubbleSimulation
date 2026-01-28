@@ -1,14 +1,16 @@
 /**
  * CONCEPT BUBBLE — Interactive Storytelling Experience
  * =====================================================
+ * Based on Figma Design
  * A scroll-driven narrative about finding creative space
  * amidst digital friction and distraction.
  *
- * Design System:
+ * Design System (from Figma):
  * - Amber (#FFA500): Human / creativity / warmth
- * - Purple (#8F24F5): Tech / pressure / noise
+ * - Purple Accent (#A855F7): Tech tasks / accent
+ * - Purple (#8F24F5): Deeper tech elements
  * - Bubbles: Friction contained
- * - Neurons: Thinking space
+ * - Font: IBM Plex Sans
  */
 
 // =============================================
@@ -19,21 +21,21 @@ const CONFIG = {
     colors: {
         amber: '#FFA500',
         purple: '#8F24F5',
+        purpleAccent: '#A855F7',
         black: '#0D0D0D',
         white: '#FFFFFF'
     },
+    // Tasks matching Figma design (no emoji icons - text only)
     tasks: [
-        { icon: '📧', label: '47 unread' },
-        { icon: '🕐', label: 'meeting in 5m' },
-        { icon: '📋', label: 'quarterly report' },
-        { icon: '🔔', label: '12 notifications' },
-        { icon: '📱', label: 'slack ping' },
-        { icon: '📊', label: 'analytics review' },
-        { icon: '💬', label: 'reply pending' },
-        { icon: '📅', label: 'deadline tomorrow' }
+        { label: 'meeting in 5 min' },
+        { label: 'deadline tomorrow' },
+        { label: 'analytics review' },
+        { label: 'quarterly report' },
+        { label: '47 unread' },
+        { label: 'reply pending' }
     ],
-    bubbleCount: 8,
-    neuronCount: 50
+    bubbleCount: 6,
+    neuronCount: 40
 };
 
 const state = {
@@ -59,6 +61,7 @@ const elements = {
     scrollContainer: null,
     scenes: null,
     cursorGlow: null,
+    brushCursor: null,
     progressBar: null,
     previewCanvas: null,
     previewCtx: null,
@@ -72,7 +75,6 @@ const elements = {
     peacefulBubbles: null,
     paintingArea: null,
     colorBtns: null,
-    brushSize: null,
     finalPreview: null
 };
 
@@ -83,22 +85,14 @@ const elements = {
 document.addEventListener('DOMContentLoaded', init);
 
 function init() {
-    // Cache DOM elements
     cacheElements();
-
-    // Initialize scenes
     initScene1();
     initScene2();
     initScene3();
     initScene4();
     initScene5();
-
-    // Set up global event listeners
     setupGlobalListeners();
-
-    // Start animation loops
     requestAnimationFrame(animate);
-
     console.log('Concept Bubble initialized');
 }
 
@@ -106,6 +100,7 @@ function cacheElements() {
     elements.scrollContainer = document.getElementById('scroll-container');
     elements.scenes = document.querySelectorAll('.scene');
     elements.cursorGlow = document.getElementById('cursor-glow');
+    elements.brushCursor = document.getElementById('brush-cursor');
     elements.progressBar = document.getElementById('progress-bar');
     elements.previewCanvas = document.getElementById('preview-canvas');
     elements.paintingCanvas = document.getElementById('painting-canvas');
@@ -116,16 +111,13 @@ function cacheElements() {
     elements.peacefulBubbles = document.getElementById('peaceful-bubbles');
     elements.paintingArea = document.getElementById('painting-area');
     elements.colorBtns = document.querySelectorAll('.color-btn');
-    elements.brushSize = document.getElementById('brush-size');
     elements.finalPreview = document.getElementById('final-preview');
 
-    // Initialize canvas contexts
     if (elements.previewCanvas) {
         elements.previewCtx = elements.previewCanvas.getContext('2d');
     }
     if (elements.paintingCanvas) {
         elements.paintingCtx = elements.paintingCanvas.getContext('2d');
-        // Set up for smooth lines
         elements.paintingCtx.lineCap = 'round';
         elements.paintingCtx.lineJoin = 'round';
     }
@@ -140,13 +132,8 @@ function cacheElements() {
 // =============================================
 
 function setupGlobalListeners() {
-    // Mouse tracking for custom cursor
     document.addEventListener('mousemove', handleMouseMove);
-
-    // Scroll handling for scene transitions
     window.addEventListener('scroll', handleScroll);
-
-    // Window resize
     window.addEventListener('resize', handleResize);
 }
 
@@ -154,10 +141,14 @@ function handleMouseMove(e) {
     state.mouseX = e.clientX;
     state.mouseY = e.clientY;
 
-    // Update cursor glow position
     if (elements.cursorGlow) {
         elements.cursorGlow.style.left = e.clientX + 'px';
         elements.cursorGlow.style.top = e.clientY + 'px';
+    }
+
+    if (elements.brushCursor) {
+        elements.brushCursor.style.left = e.clientX + 'px';
+        elements.brushCursor.style.top = e.clientY + 'px';
     }
 }
 
@@ -166,12 +157,10 @@ function handleScroll() {
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
     state.scrollProgress = scrollTop / docHeight;
 
-    // Update progress bar
     if (elements.progressBar) {
         elements.progressBar.style.width = (state.scrollProgress * 100) + '%';
     }
 
-    // Determine current scene based on scroll position
     updateCurrentScene();
 }
 
@@ -193,14 +182,12 @@ function resizeNeuronCanvas() {
 function updateCurrentScene() {
     const scenes = elements.scenes;
     const viewportHeight = window.innerHeight;
-    const scrollY = window.scrollY;
 
     scenes.forEach((scene, index) => {
         const rect = scene.getBoundingClientRect();
         const sceneTop = rect.top;
         const sceneHeight = rect.height;
 
-        // Scene is active when it's mostly in view
         if (sceneTop < viewportHeight * 0.5 && sceneTop > -sceneHeight * 0.5) {
             if (state.currentScene !== index + 1) {
                 state.currentScene = index + 1;
@@ -216,7 +203,6 @@ function updateCurrentScene() {
 function onSceneChange(sceneNumber) {
     console.log('Scene changed to:', sceneNumber);
 
-    // Trigger scene-specific behaviors
     switch (sceneNumber) {
         case 2:
             activateScene2();
@@ -237,16 +223,8 @@ function onSceneChange(sceneNumber) {
 // SCENE 1: THE BLANK CANVAS (FRICTION)
 // =============================================
 
-/**
- * Scene 1 establishes the conflict:
- * - Girl wants to paint
- * - Tasks/distractions orbit around her
- * - User tries to paint but is interrupted
- */
-
 const scene1State = {
     tasks: [],
-    interferences: [],
     lastPaintTime: 0
 };
 
@@ -259,29 +237,37 @@ function createFloatingTasks() {
     const container = elements.floatingTasks;
     if (!container) return;
 
+    // Task positions matching Figma layout (scattered around canvas area)
+    const taskPositions = [
+        { x: '70%', y: '15%', rotate: '-8deg' },   // deadline tomorrow (top right)
+        { x: '75%', y: '30%', rotate: '5deg' },    // reply pending
+        { x: '80%', y: '45%', rotate: '-3deg' },   // meeting in 5 min
+        { x: '55%', y: '60%', rotate: '6deg' },    // quarterly report
+        { x: '65%', y: '75%', rotate: '-5deg' },   // 47 unread
+        { x: '50%', y: '25%', rotate: '4deg' }     // analytics review
+    ];
+
     CONFIG.tasks.forEach((task, index) => {
         const taskEl = document.createElement('div');
         taskEl.className = 'floating-task';
-        taskEl.innerHTML = `<span class="icon">${task.icon}</span><span>${task.label}</span>`;
+        taskEl.textContent = task.label;
 
-        // Position tasks in an orbit around the girl
-        const angle = (index / CONFIG.tasks.length) * Math.PI * 2;
-        const radius = 150 + Math.random() * 100;
-        const centerX = window.innerWidth * 0.35;
-        const centerY = window.innerHeight * 0.5;
+        const pos = taskPositions[index] || { x: '60%', y: '40%', rotate: '0deg' };
+        taskEl.style.left = pos.x;
+        taskEl.style.top = pos.y;
 
-        taskEl.style.left = (centerX + Math.cos(angle) * radius) + 'px';
-        taskEl.style.top = (centerY + Math.sin(angle) * radius) + 'px';
-
-        // Custom orbit properties
-        taskEl.style.setProperty('--orbit-duration', (6 + Math.random() * 4) + 's');
-        taskEl.style.setProperty('--orbit-delay', (-Math.random() * 5) + 's');
-        taskEl.style.setProperty('--orbit-x1', (20 + Math.random() * 30) + 'px');
-        taskEl.style.setProperty('--orbit-y1', (-15 - Math.random() * 25) + 'px');
-        taskEl.style.setProperty('--orbit-x2', (Math.random() * 20 - 10) + 'px');
-        taskEl.style.setProperty('--orbit-y2', (-30 - Math.random() * 20) + 'px');
-        taskEl.style.setProperty('--orbit-x3', (-20 - Math.random() * 30) + 'px');
-        taskEl.style.setProperty('--orbit-y3', (-10 - Math.random() * 20) + 'px');
+        // Custom float animation properties
+        taskEl.style.setProperty('--float-duration', (5 + Math.random() * 3) + 's');
+        taskEl.style.setProperty('--float-delay', (-Math.random() * 4) + 's');
+        taskEl.style.setProperty('--float-x1', (10 + Math.random() * 15) + 'px');
+        taskEl.style.setProperty('--float-y1', (-8 - Math.random() * 12) + 'px');
+        taskEl.style.setProperty('--float-x2', (Math.random() * 10 - 5) + 'px');
+        taskEl.style.setProperty('--float-y2', (-15 - Math.random() * 10) + 'px');
+        taskEl.style.setProperty('--float-x3', (-10 - Math.random() * 15) + 'px');
+        taskEl.style.setProperty('--float-y3', (-5 - Math.random() * 10) + 'px');
+        taskEl.style.setProperty('--rotate-start', pos.rotate);
+        taskEl.style.setProperty('--rotate-mid', '0deg');
+        taskEl.style.setProperty('--rotate-end', (parseInt(pos.rotate) * -1) + 'deg');
 
         container.appendChild(taskEl);
         scene1State.tasks.push({
@@ -301,11 +287,15 @@ function setupPreviewCanvasDrawing() {
     let lastX = 0;
     let lastY = 0;
 
+    // Fill with light gray (matching Figma canvas color)
+    ctx.fillStyle = '#E8E8E8';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
     canvas.addEventListener('mousedown', (e) => {
         isDrawing = true;
         const rect = canvas.getBoundingClientRect();
-        lastX = e.clientX - rect.left;
-        lastY = e.clientY - rect.top;
+        lastX = (e.clientX - rect.left) * (canvas.width / rect.width);
+        lastY = (e.clientY - rect.top) * (canvas.height / rect.height);
         elements.cursorGlow.classList.add('painting');
     });
 
@@ -313,16 +303,14 @@ function setupPreviewCanvasDrawing() {
         if (!isDrawing) return;
 
         const rect = canvas.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-        // Check for interference
         if (shouldInterfere()) {
             triggerInterference(e.clientX, e.clientY);
-            // Still draw but with disruption
             drawDisruptedStroke(ctx, lastX, lastY, x, y);
         } else {
-            drawSmoothStroke(ctx, lastX, lastY, x, y, state.currentColor, 8);
+            drawSmoothStroke(ctx, lastX, lastY, x, y, state.currentColor, 6);
         }
 
         lastX = x;
@@ -340,21 +328,16 @@ function setupPreviewCanvasDrawing() {
     });
 }
 
-/**
- * Interference logic - tasks randomly disrupt painting
- * This should feel frustrating but playful
- */
 function shouldInterfere() {
     const now = Date.now();
     if (now - scene1State.lastPaintTime < 500) {
-        return Math.random() < 0.4; // 40% chance to interfere if painting quickly
+        return Math.random() < 0.45;
     }
     scene1State.lastPaintTime = now;
-    return Math.random() < 0.2; // 20% base chance
+    return Math.random() < 0.25;
 }
 
 function triggerInterference(x, y) {
-    // Flash a random task
     const uncapturedTasks = scene1State.tasks.filter(t => !t.captured);
     if (uncapturedTasks.length > 0) {
         const task = uncapturedTasks[Math.floor(Math.random() * uncapturedTasks.length)];
@@ -362,7 +345,6 @@ function triggerInterference(x, y) {
         setTimeout(() => task.element.classList.remove('interfering'), 500);
     }
 
-    // Create interference flash at cursor
     const flash = document.createElement('div');
     flash.className = 'interference-flash';
     flash.style.left = (x - 50) + 'px';
@@ -372,15 +354,13 @@ function triggerInterference(x, y) {
 }
 
 function drawDisruptedStroke(ctx, x1, y1, x2, y2) {
-    // Draw a disrupted, jittery stroke
     ctx.beginPath();
-    ctx.strokeStyle = CONFIG.colors.purple;
+    ctx.strokeStyle = CONFIG.colors.purpleAccent;
     ctx.lineWidth = 3;
     ctx.lineCap = 'round';
 
-    // Add jitter
-    const jitterX = (Math.random() - 0.5) * 20;
-    const jitterY = (Math.random() - 0.5) * 20;
+    const jitterX = (Math.random() - 0.5) * 25;
+    const jitterY = (Math.random() - 0.5) * 25;
 
     ctx.moveTo(x1 + jitterX, y1 + jitterY);
     ctx.lineTo(x2 - jitterX, y2 - jitterY);
@@ -395,7 +375,6 @@ function drawSmoothStroke(ctx, x1, y1, x2, y2, color, width) {
     ctx.lineJoin = 'round';
     ctx.moveTo(x1, y1);
 
-    // Use quadratic curve for smoother lines
     const midX = (x1 + x2) / 2;
     const midY = (y1 + y2) / 2;
     ctx.quadraticCurveTo(x1, y1, midX, midY);
@@ -407,13 +386,6 @@ function drawSmoothStroke(ctx, x1, y1, x2, y2, color, width) {
 // SCENE 2: EMERGENCE OF BUBBLES
 // =============================================
 
-/**
- * Scene 2 introduces the solution:
- * - Bubbles appear that can capture tasks
- * - User drags bubbles onto tasks
- * - Tasks get contained, showing internal neurons
- */
-
 const scene2State = {
     bubbles: [],
     detachedTasks: [],
@@ -421,7 +393,7 @@ const scene2State = {
 };
 
 function initScene2() {
-    // Bubbles will be created when scene activates
+    // Will be activated on scene enter
 }
 
 function activateScene2() {
@@ -430,73 +402,68 @@ function activateScene2() {
 
     createBubbles();
     moveTasksToScene2();
+    createNeuronBackground();
 }
 
 function createBubbles() {
     const container = elements.bubblesContainer;
     if (!container) return;
 
-    for (let i = 0; i < CONFIG.bubbleCount; i++) {
+    // Bubble positions matching Figma (scattered with varying sizes)
+    const bubbleConfigs = [
+        { x: 15, y: 40, size: 180 },   // Large left bubble
+        { x: 35, y: 55, size: 120 },   // Medium center-left
+        { x: 70, y: 65, size: 160 },   // Large right (analytics review captured)
+        { x: 55, y: 30, size: 100 },   // Small top center
+        { x: 25, y: 70, size: 90 },    // Small bottom left
+        { x: 80, y: 35, size: 110 }    // Medium top right
+    ];
+
+    bubbleConfigs.forEach((config, i) => {
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
 
-        const size = 80 + Math.random() * 60;
-        bubble.style.width = size + 'px';
-        bubble.style.height = size + 'px';
-        bubble.style.left = (Math.random() * 70 + 15) + '%';
-        bubble.style.top = (Math.random() * 60 + 20) + '%';
+        bubble.style.width = config.size + 'px';
+        bubble.style.height = config.size + 'px';
+        bubble.style.left = config.x + '%';
+        bubble.style.top = config.y + '%';
 
-        // Create neuron structure inside bubble
+        // Neuron dots inside bubble
         const neurons = document.createElement('div');
         neurons.className = 'bubble-neurons';
-        createBubbleNeurons(neurons, size);
+        createBubbleNeurons(neurons, config.size);
         bubble.appendChild(neurons);
 
-        // Add captured task container
-        const taskContainer = document.createElement('div');
-        taskContainer.className = 'captured-task-container';
-        taskContainer.style.cssText = `
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: rgba(255,255,255,0.8);
-            text-align: center;
-            padding: 10px;
-            opacity: 0;
-            transition: opacity 0.5s;
-        `;
-        bubble.appendChild(taskContainer);
+        // Label container for captured tasks
+        const label = document.createElement('div');
+        label.className = 'captured-task-label';
+        bubble.appendChild(label);
 
         container.appendChild(bubble);
 
         const bubbleData = {
             element: bubble,
-            x: parseFloat(bubble.style.left),
-            y: parseFloat(bubble.style.top),
-            size: size,
+            x: config.x,
+            y: config.y,
+            size: config.size,
             captured: null,
-            taskContainer: taskContainer
+            labelEl: label
         };
 
         scene2State.bubbles.push(bubbleData);
         setupBubbleDrag(bubbleData);
-    }
+    });
 }
 
 function createBubbleNeurons(container, bubbleSize) {
-    const neuronCount = 5 + Math.floor(Math.random() * 5);
-    const neurons = [];
+    const neuronCount = 4 + Math.floor(Math.random() * 4);
 
     for (let i = 0; i < neuronCount; i++) {
         const neuron = document.createElement('div');
         neuron.className = 'neuron-dot';
 
         const angle = Math.random() * Math.PI * 2;
-        const radius = Math.random() * (bubbleSize * 0.3);
+        const radius = Math.random() * (bubbleSize * 0.25);
         const x = bubbleSize / 2 + Math.cos(angle) * radius;
         const y = bubbleSize / 2 + Math.sin(angle) * radius;
 
@@ -505,27 +472,6 @@ function createBubbleNeurons(container, bubbleSize) {
         neuron.style.animationDelay = (Math.random() * 2) + 's';
 
         container.appendChild(neuron);
-        neurons.push({ el: neuron, x, y });
-    }
-
-    // Connect neurons with lines
-    for (let i = 0; i < neurons.length - 1; i++) {
-        const line = document.createElement('div');
-        line.className = 'neuron-line';
-
-        const n1 = neurons[i];
-        const n2 = neurons[i + 1];
-        const dx = n2.x - n1.x;
-        const dy = n2.y - n1.y;
-        const length = Math.sqrt(dx * dx + dy * dy);
-        const angle = Math.atan2(dy, dx);
-
-        line.style.width = length + 'px';
-        line.style.left = n1.x + 'px';
-        line.style.top = n1.y + 'px';
-        line.style.transform = `rotate(${angle}rad)`;
-
-        container.appendChild(line);
     }
 }
 
@@ -533,16 +479,26 @@ function moveTasksToScene2() {
     const container = elements.detachedTasks;
     if (!container) return;
 
+    // Positions for detached tasks in scene 2 (matching Figma)
+    const taskPositions = [
+        { x: 45, y: 25 },   // meeting in 5 min
+        { x: 70, y: 18 },   // deadline tomorrow
+        { x: 65, y: 38 },   // reply pending
+        { x: 10, y: 65 },   // quarterly report
+        { x: 35, y: 45 },   // 47 unread
+        { x: 72, y: 58 }    // analytics review (will be captured in demo)
+    ];
+
     scene1State.tasks.forEach((task, index) => {
         if (task.captured) return;
 
         const detached = document.createElement('div');
         detached.className = 'detached-task';
-        detached.innerHTML = `<span class="icon">${task.data.icon}</span> ${task.data.label}`;
+        detached.textContent = task.data.label;
 
-        // Random position in scene 2
-        detached.style.left = (20 + Math.random() * 60) + '%';
-        detached.style.top = (20 + Math.random() * 60) + '%';
+        const pos = taskPositions[index] || { x: 50, y: 50 };
+        detached.style.left = pos.x + '%';
+        detached.style.top = pos.y + '%';
         detached.style.animationDelay = (Math.random() * 2) + 's';
 
         container.appendChild(detached);
@@ -553,6 +509,21 @@ function moveTasksToScene2() {
             captured: false
         });
     });
+}
+
+function createNeuronBackground() {
+    const container = document.getElementById('neurons-scene2');
+    if (!container) return;
+
+    // Create subtle neuron dots in background
+    for (let i = 0; i < 15; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'neuron-bg-dot';
+        dot.style.left = (Math.random() * 100) + '%';
+        dot.style.top = (Math.random() * 100) + '%';
+        dot.style.animationDelay = (Math.random() * 3) + 's';
+        container.appendChild(dot);
+    }
 }
 
 function setupBubbleDrag(bubbleData) {
@@ -587,7 +558,6 @@ function setupBubbleDrag(bubbleData) {
         bubble.style.left = (origX + dx) + 'px';
         bubble.style.top = (origY + dy) + 'px';
 
-        // Check for task overlap
         checkTaskCapture(bubbleData);
     });
 
@@ -598,7 +568,6 @@ function setupBubbleDrag(bubbleData) {
         bubble.classList.remove('dragging');
         elements.cursorGlow.classList.remove('dragging');
 
-        // Return to percentage-based positioning
         const rect = bubble.getBoundingClientRect();
         bubble.style.position = 'absolute';
         bubble.style.left = (rect.left / window.innerWidth * 100) + '%';
@@ -616,7 +585,6 @@ function checkTaskCapture(bubbleData) {
 
         const taskRect = task.element.getBoundingClientRect();
 
-        // Check overlap
         if (rectsOverlap(bubbleRect, taskRect)) {
             captureTask(bubbleData, task);
         }
@@ -631,23 +599,16 @@ function rectsOverlap(r1, r2) {
 }
 
 function captureTask(bubbleData, taskData) {
-    // Mark as captured
     bubbleData.captured = taskData;
     taskData.captured = true;
     state.capturedTasks++;
 
-    // Animate task being captured
     taskData.element.classList.add('being-captured');
     setTimeout(() => taskData.element.remove(), 500);
 
-    // Update bubble appearance
     bubbleData.element.classList.add('captured');
+    bubbleData.labelEl.textContent = taskData.data.label;
 
-    // Show task info inside bubble
-    bubbleData.taskContainer.innerHTML = `${taskData.data.icon}<br>${taskData.data.label}`;
-    bubbleData.taskContainer.style.opacity = '1';
-
-    // Create capture particles
     createCaptureParticles(bubbleData.element);
 
     console.log(`Captured: ${taskData.data.label} (${state.capturedTasks}/${state.totalTasks})`);
@@ -678,14 +639,6 @@ function createCaptureParticles(element) {
 // SCENE 3: CALM FIELD (CLARITY)
 // =============================================
 
-/**
- * Scene 3 shows the result:
- * - Background is calm
- * - Neurons animate peacefully
- * - Captured bubbles drift in background
- * - Girl has clear space
- */
-
 const scene3State = {
     neurons: [],
     activated: false
@@ -707,14 +660,13 @@ function initNeuronBackground() {
     const canvas = elements.neuronCanvas;
     if (!canvas) return;
 
-    // Create neurons
     for (let i = 0; i < CONFIG.neuronCount; i++) {
         scene3State.neurons.push({
             x: Math.random() * canvas.width,
             y: Math.random() * canvas.height,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            radius: 2 + Math.random() * 3,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            radius: 2 + Math.random() * 2,
             pulsePhase: Math.random() * Math.PI * 2
         });
     }
@@ -727,39 +679,33 @@ function drawNeuronBackground() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Update and draw neurons
     scene3State.neurons.forEach((neuron, i) => {
-        // Update position
         neuron.x += neuron.vx;
         neuron.y += neuron.vy;
 
-        // Wrap around edges
         if (neuron.x < 0) neuron.x = canvas.width;
         if (neuron.x > canvas.width) neuron.x = 0;
         if (neuron.y < 0) neuron.y = canvas.height;
         if (neuron.y > canvas.height) neuron.y = 0;
 
-        // Pulse effect
         neuron.pulsePhase += 0.02;
         const pulse = Math.sin(neuron.pulsePhase) * 0.5 + 0.5;
 
-        // Draw neuron
         ctx.beginPath();
         ctx.arc(neuron.x, neuron.y, neuron.radius * (0.8 + pulse * 0.4), 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255, 165, 0, ${0.3 + pulse * 0.3})`;
+        ctx.fillStyle = `rgba(255, 165, 0, ${0.2 + pulse * 0.3})`;
         ctx.fill();
 
-        // Draw connections to nearby neurons
         scene3State.neurons.slice(i + 1).forEach(other => {
             const dx = other.x - neuron.x;
             const dy = other.y - neuron.y;
             const dist = Math.sqrt(dx * dx + dy * dy);
 
-            if (dist < 150) {
+            if (dist < 120) {
                 ctx.beginPath();
                 ctx.moveTo(neuron.x, neuron.y);
                 ctx.lineTo(other.x, other.y);
-                ctx.strokeStyle = `rgba(255, 165, 0, ${(1 - dist / 150) * 0.2})`;
+                ctx.strokeStyle = `rgba(255, 165, 0, ${(1 - dist / 120) * 0.15})`;
                 ctx.lineWidth = 1;
                 ctx.stroke();
             }
@@ -771,12 +717,11 @@ function createPeacefulBubbles() {
     const container = elements.peacefulBubbles;
     if (!container) return;
 
-    // Create peaceful floating bubbles
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 5; i++) {
         const bubble = document.createElement('div');
         bubble.className = 'peaceful-bubble';
 
-        const size = 60 + Math.random() * 80;
+        const size = 50 + Math.random() * 80;
         bubble.style.width = size + 'px';
         bubble.style.height = size + 'px';
         bubble.style.left = (Math.random() * 80 + 10) + '%';
@@ -791,14 +736,6 @@ function createPeacefulBubbles() {
 // SCENE 4: THE MOMENT TO CREATE
 // =============================================
 
-/**
- * Scene 4 is the payoff:
- * - User clicks canvas to enter painting mode
- * - Full painting interface appears
- * - Smooth, organic brush strokes
- * - Limited but meaningful color palette
- */
-
 const scene4State = {
     activated: false,
     paintingStarted: false,
@@ -809,8 +746,8 @@ function initScene4() {
     setupCanvasTrigger();
     setupPaintingCanvas();
     setupColorPalette();
-    setupBrushSize();
-    setupClearButton();
+    setupDownloadBtnPaint();
+    setupClosePainting();
 }
 
 function activateScene4() {
@@ -826,14 +763,13 @@ function setupCanvasTrigger() {
         if (scene4State.paintingStarted) return;
         scene4State.paintingStarted = true;
 
-        // Hide trigger, show painting area
         trigger.classList.add('hidden');
         document.getElementById('create-prompt').style.opacity = '0';
         elements.paintingArea.classList.remove('hidden');
 
-        // Clear the painting canvas
+        // Initialize canvas with light gray
         if (elements.paintingCtx) {
-            elements.paintingCtx.fillStyle = CONFIG.colors.white;
+            elements.paintingCtx.fillStyle = '#E8E8E8';
             elements.paintingCtx.fillRect(0, 0, elements.paintingCanvas.width, elements.paintingCanvas.height);
         }
     });
@@ -846,8 +782,7 @@ function setupPaintingCanvas() {
     const ctx = elements.paintingCtx;
     let isDrawing = false;
 
-    // Initialize canvas with white background
-    ctx.fillStyle = CONFIG.colors.white;
+    ctx.fillStyle = '#E8E8E8';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     canvas.addEventListener('mousedown', (e) => {
@@ -871,7 +806,6 @@ function setupPaintingCanvas() {
 
         scene4State.points.push({ x, y });
 
-        // Draw smooth curve through points
         if (scene4State.points.length >= 3) {
             drawSmoothCurve(ctx, scene4State.points, state.currentColor, state.brushSize);
         }
@@ -918,10 +852,6 @@ function setupPaintingCanvas() {
     });
 }
 
-/**
- * Draw smooth curves using quadratic bezier interpolation
- * This creates organic, flowing brush strokes
- */
 function drawSmoothCurve(ctx, points, color, width) {
     if (points.length < 2) return;
 
@@ -931,13 +861,11 @@ function drawSmoothCurve(ctx, points, color, width) {
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // Start from the second-to-last point
     const len = points.length;
     if (len < 3) {
         ctx.moveTo(points[0].x, points[0].y);
         ctx.lineTo(points[1].x, points[1].y);
     } else {
-        // Use the last 3 points for smoother drawing
         const p1 = points[len - 3];
         const p2 = points[len - 2];
         const p3 = points[len - 1];
@@ -959,38 +887,32 @@ function setupColorPalette() {
     });
 }
 
-function setupBrushSize() {
-    if (!elements.brushSize) return;
+function setupDownloadBtnPaint() {
+    const downloadBtn = document.getElementById('download-btn-paint');
+    if (!downloadBtn) return;
 
-    elements.brushSize.addEventListener('input', (e) => {
-        state.brushSize = parseInt(e.target.value);
-    });
+    downloadBtn.addEventListener('click', downloadArtwork);
 }
 
-function setupClearButton() {
-    const clearBtn = document.getElementById('clear-canvas');
-    if (!clearBtn) return;
+function setupClosePainting() {
+    const closeBtn = document.getElementById('close-painting');
+    if (!closeBtn) return;
 
-    clearBtn.addEventListener('click', () => {
-        if (elements.paintingCtx) {
-            elements.paintingCtx.fillStyle = CONFIG.colors.white;
-            elements.paintingCtx.fillRect(0, 0,
-                elements.paintingCanvas.width,
-                elements.paintingCanvas.height);
+    closeBtn.addEventListener('click', () => {
+        elements.paintingArea.classList.add('hidden');
+
+        // Show the canvas trigger again
+        const trigger = document.getElementById('floating-canvas-trigger');
+        if (trigger) {
+            trigger.classList.remove('hidden');
         }
+        document.getElementById('create-prompt').style.opacity = '1';
     });
 }
 
 // =============================================
 // SCENE 5: DOWNLOAD & SIGNATURE
 // =============================================
-
-/**
- * Scene 5 completes the journey:
- * - Preview of the creation
- * - Download with watermark
- * - Subtle branding
- */
 
 const scene5State = {
     activated: false
@@ -1011,7 +933,6 @@ function updateFinalPreview() {
     const container = elements.finalPreview;
     if (!container || !elements.paintingCanvas) return;
 
-    // Clone the painting canvas into preview
     const previewCanvas = document.createElement('canvas');
     previewCanvas.width = elements.paintingCanvas.width;
     previewCanvas.height = elements.paintingCanvas.height;
@@ -1033,39 +954,66 @@ function setupDownloadButton() {
 function downloadArtwork() {
     if (!elements.paintingCanvas) return;
 
-    // Create a new canvas with watermark
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    // Load the watermark image
+    const watermarkImg = new Image();
+    watermarkImg.crossOrigin = 'anonymous';
+    watermarkImg.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-    canvas.width = elements.paintingCanvas.width;
-    canvas.height = elements.paintingCanvas.height + 50; // Extra space for watermark
+        canvas.width = elements.paintingCanvas.width;
+        canvas.height = elements.paintingCanvas.height;
 
-    // Draw white background
-    ctx.fillStyle = CONFIG.colors.white;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Draw the painting
+        ctx.drawImage(elements.paintingCanvas, 0, 0);
 
-    // Draw the painting
-    ctx.drawImage(elements.paintingCanvas, 0, 0);
+        // Calculate watermark size - scale to reasonable size
+        const maxWidth = 180;
+        const scale = maxWidth / watermarkImg.width;
+        const watermarkWidth = watermarkImg.width * scale;
+        const watermarkHeight = watermarkImg.height * scale;
 
-    // Add watermark
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.font = '16px "Segoe UI", system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Concept Bubble', canvas.width / 2, canvas.height - 18);
+        // Position in bottom right with padding
+        const watermarkX = canvas.width - watermarkWidth - 15;
+        const watermarkY = canvas.height - watermarkHeight - 12;
 
-    // Add subtle line above watermark
-    ctx.strokeStyle = 'rgba(255, 165, 0, 0.3)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2 - 80, canvas.height - 40);
-    ctx.lineTo(canvas.width / 2 + 80, canvas.height - 40);
-    ctx.stroke();
+        // Draw the signature
+        ctx.drawImage(watermarkImg, watermarkX, watermarkY, watermarkWidth, watermarkHeight);
 
-    // Trigger download
-    const link = document.createElement('a');
-    link.download = 'concept-bubble-artwork.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+        // Trigger download
+        const link = document.createElement('a');
+        link.download = 'concept-bubble-artwork.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+
+    watermarkImg.onerror = function() {
+        // Fallback to text watermark if image fails to load
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = elements.paintingCanvas.width;
+        canvas.height = elements.paintingCanvas.height;
+
+        ctx.drawImage(elements.paintingCanvas, 0, 0);
+
+        // Draw text watermark in bottom right
+        ctx.fillStyle = 'rgba(80, 80, 80, 0.6)';
+        ctx.font = 'italic 500 18px "IBM Plex Sans", sans-serif';
+        ctx.textAlign = 'right';
+        ctx.fillText('Concept ', canvas.width - 85, canvas.height - 20);
+
+        // "Bubble" in amber
+        ctx.fillStyle = 'rgba(255, 165, 0, 0.7)';
+        ctx.fillText('Bubble', canvas.width - 15, canvas.height - 20);
+
+        const link = document.createElement('a');
+        link.download = 'concept-bubble-artwork.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+
+    watermarkImg.src = 'assets/signature.png';
 }
 
 // =============================================
@@ -1073,12 +1021,10 @@ function downloadArtwork() {
 // =============================================
 
 function animate() {
-    // Scene 3 neuron animation
     if (state.currentScene === 3 && scene3State.activated) {
         drawNeuronBackground();
     }
 
-    // Update final preview when in scene 5
     if (state.currentScene === 5 && scene4State.paintingStarted) {
         updateFinalPreview();
     }
@@ -1087,33 +1033,7 @@ function animate() {
 }
 
 // =============================================
-// UTILITY FUNCTIONS
-// =============================================
-
-/**
- * Elastic easing for organic motion
- */
-function elasticOut(t) {
-    const p = 0.3;
-    return Math.pow(2, -10 * t) * Math.sin((t - p / 4) * (2 * Math.PI) / p) + 1;
-}
-
-/**
- * Smooth interpolation
- */
-function lerp(start, end, t) {
-    return start + (end - start) * t;
-}
-
-/**
- * Clamp a value between min and max
- */
-function clamp(value, min, max) {
-    return Math.min(Math.max(value, min), max);
-}
-
-// =============================================
-// DEBUG (remove in production)
+// DEBUG
 // =============================================
 
 if (window.location.search.includes('debug')) {
