@@ -222,7 +222,8 @@ body {
     left: 26%;
     top: 15%;
     rotate: -5deg;
-    z-index: 15;
+    z-index: 35;
+    pointer-events: none;
 }
 
 #girl-image {
@@ -239,7 +240,7 @@ body {
     left: 77%;
     top: 52%;
     transform: translateY(-50%);
-    z-index: 10;
+    z-index: 20;
 }
 
 #easel {
@@ -278,6 +279,7 @@ body {
     background: var(--canvas-border);
     padding: 8px;
     border-radius: 4px;
+    z-index: 30;
 }
 
 #preview-canvas {
