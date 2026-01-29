@@ -219,31 +219,33 @@ body {
 /* Girl Character Container - Figma: x=261 (18%), width=1211, height=861 */
 #girl-container {
     position: absolute;
-    left: 18%;
-    top: 25%;
-    z-index: 10;
+    left: 26%;
+    top: 15%;
+    rotate: -5deg;
+    z-index: 15;
 }
 
 #girl-image {
-    width: 84vw;
-    max-width: 1211px;
+    width: 90vw;
+    max-width: 10000px;
     height: auto;
     filter: drop-shadow(0 10px 40px rgba(0,0,0,0.5));
+    pointer-events: none;
 }
 
 /* Easel and Canvas - Figma: x=1021 (71%), y=465 (45%), width=266, height=305 */
 #easel-container {
     position: absolute;
-    left: 71%;
-    top: 45%;
+    left: 77%;
+    top: 52%;
     transform: translateY(-50%);
-    z-index: 5;
+    z-index: 10;
 }
 
 #easel {
     position: relative;
-    width: 266px;
-    height: 380px;
+    width: 277px;
+    height: 390px;
 }
 
 #easel-post {
