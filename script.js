@@ -291,23 +291,23 @@ function setupPreviewCanvasDrawing() {
     ctx.fillStyle = '#E8E8E8';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    canvas.addEventListener('mousedown', (e) => {
+    function startDrawing(clientX, clientY) {
         isDrawing = true;
         const rect = canvas.getBoundingClientRect();
-        lastX = (e.clientX - rect.left) * (canvas.width / rect.width);
-        lastY = (e.clientY - rect.top) * (canvas.height / rect.height);
-        elements.cursorGlow.classList.add('painting');
-    });
+        lastX = (clientX - rect.left) * (canvas.width / rect.width);
+        lastY = (clientY - rect.top) * (canvas.height / rect.height);
+        if (elements.cursorGlow) elements.cursorGlow.classList.add('painting');
+    }
 
-    canvas.addEventListener('mousemove', (e) => {
+    function draw(clientX, clientY) {
         if (!isDrawing) return;
 
         const rect = canvas.getBoundingClientRect();
-        const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-        const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+        const x = (clientX - rect.left) * (canvas.width / rect.width);
+        const y = (clientY - rect.top) * (canvas.height / rect.height);
 
         if (shouldInterfere()) {
-            triggerInterference(e.clientX, e.clientY);
+            triggerInterference(clientX, clientY);
             drawDisruptedStroke(ctx, lastX, lastY, x, y);
         } else {
             drawSmoothStroke(ctx, lastX, lastY, x, y, state.currentColor, 6);
@@ -315,17 +315,42 @@ function setupPreviewCanvasDrawing() {
 
         lastX = x;
         lastY = y;
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+        if (elements.cursorGlow) elements.cursorGlow.classList.remove('painting');
+    }
+
+    // Mouse events
+    canvas.addEventListener('mousedown', (e) => {
+        startDrawing(e.clientX, e.clientY);
     });
 
-    canvas.addEventListener('mouseup', () => {
-        isDrawing = false;
-        elements.cursorGlow.classList.remove('painting');
+    canvas.addEventListener('mousemove', (e) => {
+        draw(e.clientX, e.clientY);
     });
 
-    canvas.addEventListener('mouseleave', () => {
-        isDrawing = false;
-        elements.cursorGlow.classList.remove('painting');
-    });
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseleave', stopDrawing);
+
+    // Touch events for mobile
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        startDrawing(touch.clientX, touch.clientY);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        draw(touch.clientX, touch.clientY);
+    }, { passive: false });
+
+    canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        stopDrawing();
+    }, { passive: false });
 }
 
 function shouldInterfere() {
@@ -419,7 +444,7 @@ function createBubbles() {
         { x: 80, y: 35, size: 110 }    // Medium top right
     ];
 
-    bubbleConfigs.forEach((config, i) => {
+    bubbleConfigs.forEach((config) => {
         const bubble = document.createElement('div');
         bubble.className = 'bubble';
 
