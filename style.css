@@ -1121,3 +1121,600 @@ body {
         height: 200px;
     }
 }
+
+/* =============================================
+   TABLET RESPONSIVE (768px and below)
+   ============================================= */
+
+@media (max-width: 768px) {
+    /* Enable default cursor on touch devices */
+    body {
+        cursor: auto;
+    }
+
+    #cursor-glow,
+    #brush-cursor {
+        display: none;
+    }
+
+    /* Scene 1 */
+    #intro-title {
+        left: 5%;
+        top: 8%;
+    }
+
+    #intro-title h1 {
+        font-size: clamp(48px, 12vw, 72px);
+    }
+
+    .tagline {
+        font-size: clamp(16px, 4vw, 24px);
+        margin-top: 20px;
+    }
+
+    #girl-container {
+        left: 0;
+        top: 25%;
+        rotate: -3deg;
+    }
+
+    #girl-image {
+        width: 100vw;
+    }
+
+    #easel-container {
+        left: 50%;
+        top: 55%;
+        transform: translate(-50%, -50%);
+    }
+
+    #easel {
+        transform: scale(0.7);
+    }
+
+    #paint-prompt {
+        left: 5%;
+        bottom: 15%;
+        padding: 10px 18px;
+        font-size: 13px;
+    }
+
+    .floating-task {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    /* Scene 2 */
+    #bubble-instruction {
+        top: 40px;
+    }
+
+    #bubble-instruction p {
+        font-size: 18px;
+        padding: 0 20px;
+        text-align: center;
+    }
+
+    .bubble {
+        transform: scale(0.8);
+    }
+
+    .detached-task {
+        padding: 8px 14px;
+        font-size: 12px;
+    }
+
+    /* Scene 3 */
+    .scene3-intro {
+        top: 40px;
+        font-size: 16px;
+        padding: 0 20px;
+        text-align: center;
+    }
+
+    #girl-clear {
+        top: 50%;
+    }
+
+    #girl-calm-image {
+        width: 280px;
+    }
+
+    .calm-message {
+        bottom: 12%;
+    }
+
+    .calm-message p {
+        font-size: 24px;
+    }
+
+    /* Scene 4 */
+    #create-prompt {
+        top: 12%;
+    }
+
+    #create-prompt h2 {
+        font-size: 36px;
+    }
+
+    #create-prompt p {
+        font-size: 16px;
+    }
+
+    .canvas-surface {
+        width: 240px;
+        height: 180px;
+    }
+
+    #easel-base-trigger {
+        width: 260px;
+    }
+
+    /* Painting Area */
+    #painting-area {
+        padding: 20px;
+    }
+
+    #painting-canvas {
+        width: 90vw;
+        max-width: 400px;
+        height: auto;
+        aspect-ratio: 7/5;
+    }
+
+    #color-palette {
+        margin-top: 30px;
+        gap: 15px;
+    }
+
+    .color-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    #download-btn-paint {
+        bottom: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    #close-painting {
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+    }
+
+    /* Scene 5 */
+    .final-text {
+        font-size: 20px;
+    }
+
+    #final-preview {
+        width: 90vw;
+        max-width: 350px;
+        height: auto;
+        aspect-ratio: 450/340;
+    }
+
+    #download-btn {
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+
+    .signature {
+        margin-top: 40px;
+        font-size: 16px;
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+        bottom: 25px;
+    }
+
+    .scroll-arrow {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* =============================================
+   MOBILE RESPONSIVE (480px and below)
+   ============================================= */
+
+@media (max-width: 480px) {
+    /* Scene 1 */
+    #intro-title {
+        left: 4%;
+        top: 5%;
+    }
+
+    #intro-title h1 {
+        font-size: clamp(36px, 14vw, 56px);
+    }
+
+    .tagline {
+        font-size: clamp(14px, 4vw, 18px);
+        margin-top: 16px;
+        max-width: 95%;
+    }
+
+    #girl-container {
+        left: -10%;
+        top: 22%;
+        rotate: -2deg;
+    }
+
+    #girl-image {
+        width: 120vw;
+    }
+
+    #easel-container {
+        left: 50%;
+        top: 58%;
+    }
+
+    #easel {
+        transform: scale(0.55);
+    }
+
+    #paint-prompt {
+        left: 4%;
+        right: 4%;
+        bottom: 12%;
+        text-align: center;
+        padding: 10px 16px;
+        font-size: 12px;
+    }
+
+    .floating-task {
+        padding: 6px 12px;
+        font-size: 11px;
+        border-radius: 16px;
+    }
+
+    /* Scene 2 */
+    #bubble-instruction {
+        top: 30px;
+    }
+
+    #bubble-instruction p {
+        font-size: 16px;
+        line-height: 1.4;
+    }
+
+    .bubble {
+        transform: scale(0.65);
+    }
+
+    .bubble .captured-task-label {
+        font-size: 9px;
+    }
+
+    .detached-task {
+        padding: 6px 12px;
+        font-size: 11px;
+        border-radius: 16px;
+    }
+
+    /* Scene 3 */
+    .scene3-intro {
+        top: 30px;
+        font-size: 14px;
+    }
+
+    #girl-clear {
+        top: 48%;
+    }
+
+    #girl-calm-image {
+        width: 220px;
+    }
+
+    .calm-message {
+        bottom: 15%;
+        padding: 0 15px;
+    }
+
+    .calm-message p {
+        font-size: 20px;
+        margin: 6px 0;
+    }
+
+    /* Scene 4 */
+    #create-prompt {
+        top: 10%;
+        padding: 0 20px;
+    }
+
+    #create-prompt h2 {
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    #create-prompt p {
+        font-size: 14px;
+    }
+
+    #floating-canvas-trigger {
+        top: 52%;
+    }
+
+    #easel-post-trigger {
+        height: 30px;
+    }
+
+    .canvas-surface {
+        width: 200px;
+        height: 150px;
+    }
+
+    #easel-base-trigger {
+        width: 220px;
+        height: 12px;
+    }
+
+    /* Painting Area */
+    #painting-area {
+        padding: 15px;
+    }
+
+    #painting-container {
+        margin-top: 60px;
+    }
+
+    #painting-easel-post {
+        height: 20px;
+    }
+
+    #painting-canvas {
+        width: 95vw;
+        max-width: 320px;
+        border-width: 6px;
+    }
+
+    #color-palette {
+        margin-top: 25px;
+        gap: 12px;
+    }
+
+    .color-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    #download-btn-paint {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin-top: 25px;
+        padding: 12px 24px;
+        font-size: 14px;
+    }
+
+    #close-painting {
+        top: 15px;
+        right: 15px;
+        width: 36px;
+        height: 36px;
+    }
+
+    #close-painting svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Scene 5 */
+    #final-area {
+        padding: 0 20px;
+    }
+
+    .final-text {
+        font-size: 18px;
+        letter-spacing: 1px;
+        margin-bottom: 30px;
+    }
+
+    #final-preview {
+        width: 95vw;
+        max-width: 300px;
+        margin-bottom: 30px;
+        border-width: 6px;
+    }
+
+    #download-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+
+    .signature {
+        margin-top: 30px;
+        font-size: 14px;
+        letter-spacing: 3px;
+    }
+
+    /* Scroll hint */
+    .scroll-hint {
+        bottom: 20px;
+    }
+
+    .scroll-arrow {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Progress bar thicker on mobile for visibility */
+    #progress-bar {
+        height: 4px;
+    }
+}
+
+/* =============================================
+   SMALL MOBILE (360px and below)
+   ============================================= */
+
+@media (max-width: 360px) {
+    #intro-title h1 {
+        font-size: 32px;
+    }
+
+    .tagline {
+        font-size: 13px;
+    }
+
+    #easel {
+        transform: scale(0.45);
+    }
+
+    #girl-calm-image {
+        width: 180px;
+    }
+
+    .calm-message p {
+        font-size: 18px;
+    }
+
+    .canvas-surface {
+        width: 170px;
+        height: 128px;
+    }
+
+    #easel-base-trigger {
+        width: 190px;
+    }
+
+    #painting-canvas {
+        max-width: 280px;
+    }
+
+    #final-preview {
+        max-width: 260px;
+    }
+
+    #bubble-instruction p {
+        font-size: 14px;
+    }
+}
+
+/* =============================================
+   LANDSCAPE MOBILE
+   ============================================= */
+
+@media (max-height: 500px) and (orientation: landscape) {
+    .scene {
+        min-height: 100vh;
+    }
+
+    #intro-title {
+        top: 5%;
+        left: 3%;
+    }
+
+    #intro-title h1 {
+        font-size: 36px;
+    }
+
+    .tagline {
+        font-size: 14px;
+        margin-top: 10px;
+    }
+
+    #girl-container {
+        left: 30%;
+        top: 10%;
+    }
+
+    #girl-image {
+        width: 60vw;
+    }
+
+    #easel-container {
+        left: 70%;
+        top: 50%;
+    }
+
+    #easel {
+        transform: scale(0.5);
+    }
+
+    #paint-prompt {
+        bottom: 8%;
+        left: 3%;
+    }
+
+    /* Scene 3 */
+    #girl-calm-image {
+        width: 200px;
+    }
+
+    .calm-message {
+        bottom: 5%;
+    }
+
+    .calm-message p {
+        font-size: 18px;
+    }
+
+    /* Scene 4 */
+    #create-prompt {
+        top: 8%;
+    }
+
+    #create-prompt h2 {
+        font-size: 28px;
+    }
+
+    .canvas-surface {
+        width: 200px;
+        height: 140px;
+    }
+
+    /* Painting area */
+    #painting-container {
+        margin-top: 40px;
+    }
+
+    #painting-canvas {
+        max-width: 50vw;
+        max-height: 60vh;
+    }
+
+    #color-palette {
+        margin-top: 15px;
+    }
+
+    .color-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    #download-btn-paint {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        margin-top: 0;
+        padding: 10px 18px;
+        font-size: 12px;
+    }
+
+    /* Scene 5 */
+    #final-preview {
+        max-width: 40vw;
+        max-height: 50vh;
+        margin-bottom: 20px;
+    }
+
+    .final-text {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+
+    .signature {
+        margin-top: 20px;
+    }
+
+    .scroll-hint {
+        bottom: 10px;
+    }
+}

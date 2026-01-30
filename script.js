@@ -531,48 +531,74 @@ function setupBubbleDrag(bubbleData) {
     let isDragging = false;
     let startX, startY, origX, origY;
 
-    bubble.addEventListener('mousedown', (e) => {
+    function startDrag(clientX, clientY) {
         if (bubbleData.captured) return;
 
         isDragging = true;
         bubble.classList.add('dragging');
-        elements.cursorGlow.classList.add('dragging');
+        if (elements.cursorGlow) elements.cursorGlow.classList.add('dragging');
 
-        startX = e.clientX;
-        startY = e.clientY;
+        startX = clientX;
+        startY = clientY;
 
         const rect = bubble.getBoundingClientRect();
         origX = rect.left;
         origY = rect.top;
+    }
 
-        e.preventDefault();
-    });
-
-    document.addEventListener('mousemove', (e) => {
+    function moveDrag(clientX, clientY) {
         if (!isDragging) return;
 
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
 
         bubble.style.position = 'fixed';
         bubble.style.left = (origX + dx) + 'px';
         bubble.style.top = (origY + dy) + 'px';
 
         checkTaskCapture(bubbleData);
-    });
+    }
 
-    document.addEventListener('mouseup', () => {
+    function endDrag() {
         if (!isDragging) return;
 
         isDragging = false;
         bubble.classList.remove('dragging');
-        elements.cursorGlow.classList.remove('dragging');
+        if (elements.cursorGlow) elements.cursorGlow.classList.remove('dragging');
 
         const rect = bubble.getBoundingClientRect();
         bubble.style.position = 'absolute';
         bubble.style.left = (rect.left / window.innerWidth * 100) + '%';
         bubble.style.top = (rect.top / window.innerHeight * 100) + '%';
+    }
+
+    // Mouse events
+    bubble.addEventListener('mousedown', (e) => {
+        startDrag(e.clientX, e.clientY);
+        e.preventDefault();
     });
+
+    document.addEventListener('mousemove', (e) => {
+        moveDrag(e.clientX, e.clientY);
+    });
+
+    document.addEventListener('mouseup', endDrag);
+
+    // Touch events
+    bubble.addEventListener('touchstart', (e) => {
+        const touch = e.touches[0];
+        startDrag(touch.clientX, touch.clientY);
+        e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        moveDrag(touch.clientX, touch.clientY);
+        e.preventDefault();
+    }, { passive: false });
+
+    document.addEventListener('touchend', endDrag);
 }
 
 function checkTaskCapture(bubbleData) {
