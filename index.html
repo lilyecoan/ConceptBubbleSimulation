@@ -23,7 +23,7 @@
                         <span class="title-concept">CONCEPT</span>
                         <span class="title-bubble">BUBBLE</span>
                     </h1>
-                    <p class="tagline">AI removes friction. Human taste makes the call.</p>
+                    <p class="tagline">AI removes friction. You focus on creativity.</p>
                 </div>
 
                 <!-- The Easel and Canvas -->
@@ -33,7 +33,7 @@
                         <div id="easel-base"></div>
                     </div>
                     <div id="canvas-frame">
-                        <canvas id="preview-canvas" width="250" height="290"></canvas>
+                        <canvas id="preview-canvas" width="450" height="340"></canvas>
                     </div>
                 </div>
                 
@@ -50,14 +50,19 @@
                 <!-- Interference overlay for Scene 1 -->
                 <div id="interference-layer"></div>
 
-                <!-- Paint prompt -->
+                <!-- Paint prompt - italic text with glowing arrow -->
                 <div id="paint-prompt">
-                    <span>Try to paint with friction.</span>
+                    <span class="paint-prompt-text">Try to paint on the canvas with friction in the way</span>
+                    <div class="paint-prompt-arrow">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
 
-            <div class="scroll-hint">
-                <svg class="scroll-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="scroll-hint" id="scene1-scroll-hint">
+                <svg class="scroll-arrow" width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 4L12 20M12 20L6 14M12 20L18 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
@@ -68,7 +73,8 @@
             <div class="scene-content">
                 <!-- Instruction -->
                 <div id="bubble-instruction">
-                    <p>Drag bubbles onto tasks to capture them.</p>
+                    <p>These bubbles help you hold things so you don't have to.</p>
+                    <p>Drag a bubble over a task to let it carry it.</p>
                 </div>
 
                 <!-- Bubbles container -->
@@ -81,12 +87,17 @@
                     <!-- Moved from scene 1 -->
                 </div>
 
+                <!-- Completion message -->
+                <div id="completion-message" class="hidden">
+                    <p>AI carries the tasks. You keep the thinking.</p>
+                </div>
+
                 <!-- Neurons background -->
                 <div id="neurons-scene2"></div>
             </div>
 
-            <div class="scroll-hint">
-                <svg class="scroll-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <div class="scroll-hint" id="scene2-scroll-hint">
+                <svg class="scroll-arrow" width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 4L12 20M12 20L6 14M12 20L18 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
@@ -109,7 +120,7 @@
                 <!-- Main message -->
                 <div class="calm-message">
                     <p>You have space to <span class="highlight">THINK</span>.</p>
-                    <p>Room to <span class="highlight">BREATHE</span>.</p>
+                    <p>Room to <span class="highlight">CREATE</span>.</p>
                 </div>
 
                 <!-- Captured bubbles float peacefully -->
@@ -119,7 +130,7 @@
             </div>
 
             <div class="scroll-hint">
-                <svg class="scroll-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="scroll-arrow" width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 4L12 20M12 20L6 14M12 20L18 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
@@ -144,7 +155,7 @@
             </div>
 
             <div class="scroll-hint">
-                <svg class="scroll-arrow" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="scroll-arrow" width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 4L12 20M12 20L6 14M12 20L18 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </div>
@@ -154,7 +165,7 @@
         <section id="scene-5" class="scene">
             <div class="scene-content">
                 <div id="final-area">
-                    <p class="final-text">your creation is ready</p>
+                    <p class="final-text">Your creation is ready</p>
                     <div id="final-preview"></div>
                     <button id="download-btn">Download Painting</button>
                     <p class="signature">Concept Bubble</p>
@@ -166,13 +177,6 @@
 
     <!-- Full painting canvas (overlay) -->
     <div id="painting-area" class="hidden">
-        <!-- Close button -->
-        <button id="close-painting" title="Close">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </button>
-
         <div id="painting-container">
             <div id="painting-easel-post"></div>
             <canvas id="painting-canvas" width="700" height="500"></canvas>
@@ -184,10 +188,21 @@
             <button class="color-btn" data-color="#A855F7" style="background: #A855F7;" title="Purple"></button>
             <button class="color-btn active" data-color="#FFA500" style="background: #FFA500;" title="Amber"></button>
             <button class="color-btn" data-color="#FFFFFF" style="background: #FFFFFF;" title="White"></button>
+            <button class="color-btn eraser-btn" data-color="eraser" title="Eraser">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 20H9L3.29 14.29C2.9 13.9 2.9 13.27 3.29 12.88L13.88 2.29C14.27 1.9 14.9 1.9 15.29 2.29L21.71 8.71C22.1 9.1 22.1 9.73 21.71 10.12L13 19H20V20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M9 19L18 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
         </div>
 
-        <!-- Download button in paint mode -->
-        <button id="download-btn-paint">Download Painting</button>
+        <!-- Glowing scroll arrow (appears when painting starts) -->
+        <div id="paint-scroll-arrow" class="hidden">
+            <p>Scroll down to save your creation</p>
+            <svg class="scroll-arrow glowing" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 4L12 20M12 20L6 14M12 20L18 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
 
         <!-- Brush cursor indicator -->
         <div id="brush-cursor"></div>

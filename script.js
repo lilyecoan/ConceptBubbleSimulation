@@ -225,26 +225,33 @@ function onSceneChange(sceneNumber) {
 
 const scene1State = {
     tasks: [],
-    lastPaintTime: 0
+    lastPaintTime: 0,
+    hasInteractedWithCanvas: false
 };
 
 function initScene1() {
     createFloatingTasks();
     setupPreviewCanvasDrawing();
+
+    // Add glowing effect to canvas frame
+    const canvasFrame = document.getElementById('canvas-frame');
+    if (canvasFrame) {
+        canvasFrame.classList.add('glowing');
+    }
 }
 
 function createFloatingTasks() {
     const container = elements.floatingTasks;
     if (!container) return;
 
-    // Task positions matching Figma layout (scattered around canvas area)
+    // Task positions scattered on top of the canvas (canvas is right: 5%, centered around 70-75%)
     const taskPositions = [
-        { x: '70%', y: '15%', rotate: '-8deg' },   // deadline tomorrow (top right)
-        { x: '75%', y: '30%', rotate: '5deg' },    // reply pending
-        { x: '80%', y: '45%', rotate: '-3deg' },   // meeting in 5 min
-        { x: '55%', y: '60%', rotate: '6deg' },    // quarterly report
-        { x: '65%', y: '75%', rotate: '-5deg' },   // 47 unread
-        { x: '50%', y: '25%', rotate: '4deg' }     // analytics review
+        { x: '62%', y: '32%', rotate: '-8deg' },   // meeting in 5 min - top left
+        { x: '80%', y: '32%', rotate: '4deg' },    // deadline tomorrow - top right
+        { x: '65%', y: '47%', rotate: '6deg' },    // analytics review - mid-left
+        { x: '80%', y: '52%', rotate: '-3deg' },   // quarterly report - mid-right
+        { x: '63%', y: '64%', rotate: '-5deg' },   // 47 unread - bottom left
+        { x: '80%', y: '69%', rotate: '7deg' }     // reply pending - bottom right
     ];
 
     CONFIG.tasks.forEach((task, index) => {
@@ -306,15 +313,35 @@ function setupPreviewCanvasDrawing() {
         const x = (clientX - rect.left) * (canvas.width / rect.width);
         const y = (clientY - rect.top) * (canvas.height / rect.height);
 
-        if (shouldInterfere()) {
+        // Check if painting near any task
+        const nearbyTask = findNearbyTask(clientX, clientY);
+
+        if (nearbyTask) {
+            // Always interfere when near a task
+            triggerTaskInterference(nearbyTask, clientX, clientY);
+            drawDisruptedStroke(ctx, lastX, lastY, x, y);
+        } else if (shouldInterfere()) {
+            // Random interference even when not near tasks
             triggerInterference(clientX, clientY);
             drawDisruptedStroke(ctx, lastX, lastY, x, y);
         } else {
-            drawSmoothStroke(ctx, lastX, lastY, x, y, state.currentColor, 6);
+            drawSmoothStroke(ctx, lastX, lastY, x, y, state.currentColor, 8);
         }
 
         lastX = x;
         lastY = y;
+
+        // Trigger glowing scroll arrow after user starts painting
+        if (!scene1State.hasInteractedWithCanvas) {
+            scene1State.hasInteractedWithCanvas = true;
+            activateScene1ScrollGlow();
+
+            // Remove canvas glow once user starts painting
+            const canvasFrame = document.getElementById('canvas-frame');
+            if (canvasFrame) {
+                canvasFrame.classList.remove('glowing');
+            }
+        }
     }
 
     function stopDrawing() {
@@ -355,11 +382,65 @@ function setupPreviewCanvasDrawing() {
 
 function shouldInterfere() {
     const now = Date.now();
-    if (now - scene1State.lastPaintTime < 500) {
-        return Math.random() < 0.45;
+    if (now - scene1State.lastPaintTime < 300) {
+        return Math.random() < 0.4;
     }
     scene1State.lastPaintTime = now;
-    return Math.random() < 0.25;
+    return Math.random() < 0.2;
+}
+
+function findNearbyTask(clientX, clientY) {
+    // Check if cursor overlaps or is near any floating task
+    for (const task of scene1State.tasks) {
+        if (task.captured) continue;
+
+        const taskRect = task.element.getBoundingClientRect();
+
+        // Expand the hit area significantly
+        const padding = 80;
+        const expandedRect = {
+            left: taskRect.left - padding,
+            right: taskRect.right + padding,
+            top: taskRect.top - padding,
+            bottom: taskRect.bottom + padding
+        };
+
+        // Check if cursor is inside expanded rectangle
+        if (clientX >= expandedRect.left &&
+            clientX <= expandedRect.right &&
+            clientY >= expandedRect.top &&
+            clientY <= expandedRect.bottom) {
+            return task;
+        }
+    }
+    return null;
+}
+
+function triggerTaskInterference(task, x, y) {
+    // Trigger interference on the specific task - keep it going while near
+    if (!task.element.classList.contains('interfering')) {
+        task.element.classList.add('interfering');
+    }
+
+    // Clear any existing timeout
+    if (task.interferenceTimeout) {
+        clearTimeout(task.interferenceTimeout);
+    }
+
+    // Remove after a delay of no interaction
+    task.interferenceTimeout = setTimeout(() => {
+        task.element.classList.remove('interfering');
+    }, 300);
+
+    // Create flash effect occasionally
+    if (Math.random() > 0.7) {
+        const flash = document.createElement('div');
+        flash.className = 'interference-flash';
+        flash.style.left = (x - 50) + 'px';
+        flash.style.top = (y - 50) + 'px';
+        document.getElementById('interference-layer').appendChild(flash);
+        setTimeout(() => flash.remove(), 500);
+    }
 }
 
 function triggerInterference(x, y) {
@@ -381,15 +462,27 @@ function triggerInterference(x, y) {
 function drawDisruptedStroke(ctx, x1, y1, x2, y2) {
     ctx.beginPath();
     ctx.strokeStyle = CONFIG.colors.purpleAccent;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 4;
     ctx.lineCap = 'round';
 
-    const jitterX = (Math.random() - 0.5) * 25;
-    const jitterY = (Math.random() - 0.5) * 25;
+    const jitterX = (Math.random() - 0.5) * 45;
+    const jitterY = (Math.random() - 0.5) * 45;
+    const jitterX2 = (Math.random() - 0.5) * 30;
+    const jitterY2 = (Math.random() - 0.5) * 30;
 
+    // Draw multiple chaotic lines for more disruption
     ctx.moveTo(x1 + jitterX, y1 + jitterY);
-    ctx.lineTo(x2 - jitterX, y2 - jitterY);
+    ctx.lineTo(x2 - jitterX2, y2 - jitterY2);
     ctx.stroke();
+
+    // Add extra scratch marks
+    if (Math.random() > 0.5) {
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.moveTo(x1 - jitterY, y1 + jitterX * 0.5);
+        ctx.lineTo(x2 + jitterY2, y2 - jitterX2 * 0.5);
+        ctx.stroke();
+    }
 }
 
 function drawSmoothStroke(ctx, x1, y1, x2, y2, color, width) {
@@ -405,6 +498,13 @@ function drawSmoothStroke(ctx, x1, y1, x2, y2, color, width) {
     ctx.quadraticCurveTo(x1, y1, midX, midY);
     ctx.lineTo(x2, y2);
     ctx.stroke();
+}
+
+function activateScene1ScrollGlow() {
+    const scrollHint = document.getElementById('scene1-scroll-hint');
+    if (scrollHint) {
+        scrollHint.classList.add('glowing');
+    }
 }
 
 // =============================================
@@ -663,6 +763,28 @@ function captureTask(bubbleData, taskData) {
     createCaptureParticles(bubbleData.element);
 
     console.log(`Captured: ${taskData.data.label} (${state.capturedTasks}/${state.totalTasks})`);
+
+    // Check if all tasks are captured
+    if (state.capturedTasks >= state.totalTasks) {
+        showCompletionMessage();
+    }
+}
+
+function showCompletionMessage() {
+    const completionMsg = document.getElementById('completion-message');
+    const scrollHint = document.getElementById('scene2-scroll-hint');
+
+    if (completionMsg) {
+        completionMsg.classList.remove('hidden');
+        completionMsg.classList.add('visible');
+    }
+
+    // After a delay, make the scroll arrow glow
+    setTimeout(() => {
+        if (scrollHint) {
+            scrollHint.classList.add('glowing');
+        }
+    }, 1500);
 }
 
 function createCaptureParticles(element) {
@@ -790,15 +912,17 @@ function createPeacefulBubbles() {
 const scene4State = {
     activated: false,
     paintingStarted: false,
-    points: []
+    hasPainted: false,
+    points: [],
+    isEraser: false
 };
 
 function initScene4() {
     setupCanvasTrigger();
     setupPaintingCanvas();
     setupColorPalette();
-    setupDownloadBtnPaint();
-    setupClosePainting();
+    setupPaintScrollArrow();
+    setupPaintingAreaScroll();
 }
 
 function activateScene4() {
@@ -839,13 +963,19 @@ function setupPaintingCanvas() {
     canvas.addEventListener('mousedown', (e) => {
         isDrawing = true;
         state.isPainting = true;
-        elements.cursorGlow.classList.add('painting');
+        if (elements.cursorGlow) elements.cursorGlow.classList.add('painting');
 
         scene4State.points = [];
         const rect = canvas.getBoundingClientRect();
         const x = (e.clientX - rect.left) * (canvas.width / rect.width);
         const y = (e.clientY - rect.top) * (canvas.height / rect.height);
         scene4State.points.push({ x, y });
+
+        // Show scroll arrow when user starts painting
+        if (!scene4State.hasPainted) {
+            scene4State.hasPainted = true;
+            showPaintScrollArrow();
+        }
     });
 
     canvas.addEventListener('mousemove', (e) => {
@@ -858,21 +988,25 @@ function setupPaintingCanvas() {
         scene4State.points.push({ x, y });
 
         if (scene4State.points.length >= 3) {
-            drawSmoothCurve(ctx, scene4State.points, state.currentColor, state.brushSize);
+            if (scene4State.isEraser) {
+                drawSmoothCurve(ctx, scene4State.points, '#E8E8E8', state.brushSize * 2);
+            } else {
+                drawSmoothCurve(ctx, scene4State.points, state.currentColor, state.brushSize);
+            }
         }
     });
 
     canvas.addEventListener('mouseup', () => {
         isDrawing = false;
         state.isPainting = false;
-        elements.cursorGlow.classList.remove('painting');
+        if (elements.cursorGlow) elements.cursorGlow.classList.remove('painting');
         scene4State.points = [];
     });
 
     canvas.addEventListener('mouseleave', () => {
         isDrawing = false;
         state.isPainting = false;
-        elements.cursorGlow.classList.remove('painting');
+        if (elements.cursorGlow) elements.cursorGlow.classList.remove('painting');
         scene4State.points = [];
     });
 
@@ -901,6 +1035,68 @@ function setupPaintingCanvas() {
         const mouseEvent = new MouseEvent('mouseup', {});
         canvas.dispatchEvent(mouseEvent);
     });
+}
+
+function showPaintScrollArrow() {
+    const scrollArrow = document.getElementById('paint-scroll-arrow');
+    if (scrollArrow) {
+        scrollArrow.classList.remove('hidden');
+        scrollArrow.classList.add('visible');
+    }
+}
+
+function setupPaintScrollArrow() {
+    const scrollArrow = document.getElementById('paint-scroll-arrow');
+    if (!scrollArrow) return;
+
+    scrollArrow.addEventListener('click', () => {
+        scrollToScene5();
+    });
+}
+
+function scrollToScene5() {
+    // Hide painting area and scroll to scene 5
+    elements.paintingArea.classList.add('hidden');
+
+    const scene5 = document.getElementById('scene-5');
+    if (scene5) {
+        scene5.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function setupPaintingAreaScroll() {
+    // Allow scrolling down from painting area to scene 5
+    let scrollAccumulator = 0;
+
+    elements.paintingArea.addEventListener('wheel', (e) => {
+        if (e.deltaY > 0 && scene4State.hasPainted) {
+            scrollAccumulator += e.deltaY;
+            if (scrollAccumulator > 150) {
+                scrollToScene5();
+                scrollAccumulator = 0;
+            }
+        }
+    }, { passive: true });
+
+    // Touch scroll support
+    let touchStartY = 0;
+    elements.paintingArea.addEventListener('touchstart', (e) => {
+        // Only track touch on the container, not on canvas
+        if (e.target === elements.paintingArea || e.target.id === 'paint-scroll-arrow' || e.target.closest('#paint-scroll-arrow')) {
+            touchStartY = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    elements.paintingArea.addEventListener('touchmove', (e) => {
+        if (touchStartY && scene4State.hasPainted) {
+            const touchY = e.touches[0].clientY;
+            const diff = touchStartY - touchY;
+            if (diff > 100) {
+                scrollToScene5();
+                touchStartY = 0;
+            }
+        }
+    }, { passive: true });
 }
 
 function drawSmoothCurve(ctx, points, color, width) {
@@ -933,31 +1129,14 @@ function setupColorPalette() {
         btn.addEventListener('click', () => {
             elements.colorBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            state.currentColor = btn.dataset.color;
+
+            if (btn.dataset.color === 'eraser') {
+                scene4State.isEraser = true;
+            } else {
+                scene4State.isEraser = false;
+                state.currentColor = btn.dataset.color;
+            }
         });
-    });
-}
-
-function setupDownloadBtnPaint() {
-    const downloadBtn = document.getElementById('download-btn-paint');
-    if (!downloadBtn) return;
-
-    downloadBtn.addEventListener('click', downloadArtwork);
-}
-
-function setupClosePainting() {
-    const closeBtn = document.getElementById('close-painting');
-    if (!closeBtn) return;
-
-    closeBtn.addEventListener('click', () => {
-        elements.paintingArea.classList.add('hidden');
-
-        // Show the canvas trigger again
-        const trigger = document.getElementById('floating-canvas-trigger');
-        if (trigger) {
-            trigger.classList.remove('hidden');
-        }
-        document.getElementById('create-prompt').style.opacity = '1';
     });
 }
 

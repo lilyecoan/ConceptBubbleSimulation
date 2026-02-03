@@ -142,22 +142,47 @@ body {
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
-    opacity: 0.6;
+    opacity: 1;
     animation: fadeInUp 1s var(--ease-soft) 1s both;
     z-index: 100;
 }
 
 .scroll-arrow {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(255, 255, 255, 0.85);
     animation: bounce 2s infinite;
-    width: 28px;
-    height: 28px;
+    width: 42px;
+    height: 42px;
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+}
+
+/* Glowing scroll arrow */
+.scroll-arrow.glowing {
+    color: var(--amber);
+    animation: bounce 2s infinite, glowPulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px var(--amber));
+}
+
+.scroll-hint.glowing .scroll-arrow {
+    color: var(--amber);
+    animation: bounce 2s infinite, glowPulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px var(--amber));
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        opacity: 0.7;
+        filter: drop-shadow(0 0 8px var(--amber));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 20px var(--amber)) drop-shadow(0 0 30px var(--amber));
+    }
 }
 
 @keyframes bounce {
     0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(8px); }
-    60% { transform: translateY(4px); }
+    40% { transform: translateY(12px); }
+    60% { transform: translateY(6px); }
 }
 
 @keyframes fadeInUp {
@@ -166,7 +191,7 @@ body {
         transform: translateX(-50%) translateY(20px);
     }
     to {
-        opacity: 0.4;
+        opacity: 1;
         transform: translateX(-50%) translateY(0);
     }
 }
@@ -216,10 +241,10 @@ body {
     opacity: 0.9;
 }
 
-/* Girl Character Container - Figma: x=261 (18%), width=1211, height=861 */
+/* Girl Character Container - in front of canvas with paintbrush on it */
 #girl-container {
     position: absolute;
-    left: 26%;
+    left: 11.5%;
     top: 15%;
     rotate: -5deg;
     z-index: 35;
@@ -234,19 +259,19 @@ body {
     pointer-events: none;
 }
 
-/* Easel and Canvas - Figma: x=1021 (71%), y=465 (45%), width=266, height=305 */
+/* Easel and Canvas - LARGE canvas to the right */
 #easel-container {
     position: absolute;
-    left: 77%;
-    top: 52%;
+    right: 5%;
+    top: 50%;
     transform: translateY(-50%);
     z-index: 20;
 }
 
 #easel {
     position: relative;
-    width: 277px;
-    height: 390px;
+    width: 520px;
+    height: 480px;
 }
 
 #easel-post {
@@ -254,10 +279,10 @@ body {
     top: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 6px;
-    height: 60px;
+    width: 8px;
+    height: 70px;
     background: var(--easel-brown);
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 #easel-base {
@@ -265,7 +290,7 @@ body {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 260px;
+    width: 490px;
     height: 20px;
     background: var(--easel-brown);
     border-radius: 4px;
@@ -273,13 +298,29 @@ body {
 
 #canvas-frame {
     position: absolute;
-    top: 50px;
+    top: 60px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--canvas-border);
-    padding: 8px;
+    padding: 10px;
     border-radius: 4px;
     z-index: 30;
+    transition: box-shadow 0.5s var(--ease-soft);
+}
+
+/* Canvas glow effect before painting */
+#canvas-frame.glowing {
+    box-shadow: 0 0 30px rgba(255, 165, 0, 0.4), 0 0 60px rgba(255, 165, 0, 0.2);
+    animation: canvasGlow 2s ease-in-out infinite;
+}
+
+@keyframes canvasGlow {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 165, 0, 0.3), 0 0 60px rgba(255, 165, 0, 0.15);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 165, 0, 0.5), 0 0 80px rgba(255, 165, 0, 0.3);
+    }
 }
 
 #preview-canvas {
@@ -287,15 +328,17 @@ body {
     background: #E8E8E8;
     border-radius: 2px;
     cursor: crosshair;
+    width: 470px;
+    height: 370px;
 }
 
-/* Floating Tasks */
+/* Floating Tasks - positioned directly on top of the canvas */
 #floating-tasks {
     position: absolute;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 20;
+    z-index: 32;
 }
 
 .floating-task {
@@ -303,30 +346,65 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 20px;
-    background: rgba(168, 85, 247, 0.2);
-    border: 1px solid var(--purple-accent);
-    border-radius: 21px;
+    padding: 10px 18px;
+    background: rgba(168, 85, 247, 0.12);
+    /* Dashed border for broken/friction feel */
+    border: 2px dashed rgba(168, 85, 247, 0.7);
+    border-radius: 3px;
     font-size: 14px;
     font-weight: 500;
     color: var(--white);
-    backdrop-filter: blur(5px);
-    animation: taskFloat var(--float-duration, 8s) ease-in-out infinite;
+    backdrop-filter: blur(4px);
+    animation: taskFloat var(--float-duration, 8s) ease-in-out infinite, taskShake 0.15s ease-in-out infinite;
     animation-delay: var(--float-delay, 0s);
     pointer-events: auto;
     transition: transform 0.3s var(--ease-elastic), opacity 0.5s, background 0.3s;
     white-space: nowrap;
+    /* Multiple offset shadows create vibrating/unstable effect */
+    box-shadow:
+        2px 2px 0 rgba(168, 85, 247, 0.4),
+        -2px -2px 0 rgba(255, 100, 100, 0.3),
+        0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+/* Constant subtle shake for friction/anxiety feel */
+@keyframes taskShake {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    25% {
+        transform: translate(0.5px, -0.5px);
+    }
+    50% {
+        transform: translate(-0.5px, 0.5px);
+    }
+    75% {
+        transform: translate(0.5px, 0.5px);
+    }
 }
 
 .floating-task:hover {
     transform: scale(1.05);
-    background: rgba(168, 85, 247, 0.35);
+    background: rgba(168, 85, 247, 0.25);
+    border-color: rgba(168, 85, 247, 0.9);
+    box-shadow:
+        3px 3px 0 rgba(168, 85, 247, 0.5),
+        -3px -3px 0 rgba(255, 100, 100, 0.4),
+        0 0 30px rgba(168, 85, 247, 0.4);
 }
 
 .floating-task.interfering {
-    animation: interferePulse 0.5s ease-in-out;
-    background: rgba(168, 85, 247, 0.5);
-    box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+    animation: interferePulse 0.4s ease-in-out, taskShake 0.03s ease-in-out infinite;
+    background: rgba(168, 85, 247, 0.6);
+    border-color: rgba(200, 100, 255, 1);
+    border-width: 3px;
+    box-shadow:
+        6px 6px 0 rgba(168, 85, 247, 0.8),
+        -6px -6px 0 rgba(255, 80, 80, 0.6),
+        0 0 60px rgba(168, 85, 247, 0.8),
+        0 0 100px rgba(255, 100, 100, 0.3);
+    transform: scale(1.15);
+    z-index: 100;
 }
 
 @keyframes taskFloat {
@@ -373,19 +451,53 @@ body {
     to { opacity: 0; transform: scale(2); }
 }
 
-/* Paint Prompt - Figma: x=37, y=660 (64% from top) */
+/* Paint Prompt - italic text with glowing arrow */
 #paint-prompt {
     position: absolute;
-    bottom: 30%;
+    top: 58%;
     left: 2.5%;
-    background: rgba(255, 165, 0, 0.2);
-    border: 1px solid var(--amber);
-    border-radius: 25px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--amber);
+    display: flex;
+    align-items: center;
+    gap: 12px;
     z-index: 25;
+}
+
+.paint-prompt-text {
+    font-size: 16px;
+    font-weight: 400;
+    font-style: italic;
+    color: var(--white);
+    opacity: 0.9;
+}
+
+.paint-prompt-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--amber);
+    animation: arrowGlow 1.5s ease-in-out infinite, arrowBounceRight 1.5s ease-in-out infinite;
+}
+
+.paint-prompt-arrow svg {
+    width: 28px;
+    height: 28px;
+    filter: drop-shadow(0 0 8px var(--amber));
+}
+
+@keyframes arrowGlow {
+    0%, 100% {
+        opacity: 0.7;
+        filter: drop-shadow(0 0 5px var(--amber));
+    }
+    50% {
+        opacity: 1;
+        filter: drop-shadow(0 0 15px var(--amber)) drop-shadow(0 0 25px var(--amber));
+    }
+}
+
+@keyframes arrowBounceRight {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(8px); }
 }
 
 /* =============================================
@@ -424,7 +536,7 @@ body {
     border-radius: 50%;
     cursor: grab;
     transition: transform 0.3s var(--ease-elastic), box-shadow 0.3s;
-    animation: bubbleFloat 6s ease-in-out infinite;
+    animation: bubbleFloat 6s ease-in-out infinite, bubbleGlowPulse 2s ease-in-out infinite;
     /* Figma-inspired gradient */
     background:
         radial-gradient(circle at 50% 50%,
@@ -434,11 +546,27 @@ body {
         radial-gradient(circle at 30% 30%,
             rgba(255, 255, 255, 0.15) 0%,
             transparent 50%);
-    border: 1px solid rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.3);
     box-shadow:
         inset 0 0 30px rgba(255, 255, 255, 0.05),
-        0 0 40px rgba(168, 85, 247, 0.1);
+        0 0 40px rgba(168, 85, 247, 0.2),
+        0 0 60px rgba(255, 165, 0, 0.15);
     filter: blur(0.5px);
+}
+
+@keyframes bubbleGlowPulse {
+    0%, 100% {
+        box-shadow:
+            inset 0 0 30px rgba(255, 255, 255, 0.05),
+            0 0 40px rgba(168, 85, 247, 0.2),
+            0 0 60px rgba(255, 165, 0, 0.15);
+    }
+    50% {
+        box-shadow:
+            inset 0 0 40px rgba(255, 255, 255, 0.1),
+            0 0 60px rgba(168, 85, 247, 0.35),
+            0 0 80px rgba(255, 165, 0, 0.25);
+    }
 }
 
 .bubble:hover {
@@ -450,7 +578,7 @@ body {
 
 .bubble.dragging {
     cursor: grabbing;
-    animation: none;
+    animation: none !important;
     transform: scale(1.12);
     filter: blur(0px);
     box-shadow:
@@ -468,7 +596,7 @@ body {
         radial-gradient(circle at 30% 30%,
             rgba(255, 255, 255, 0.35) 0%,
             transparent 50%);
-    animation: bubbleFloatCaptured 8s ease-in-out infinite;
+    animation: bubbleFloatCaptured 8s ease-in-out infinite !important;
     border: 1px solid rgba(255, 165, 0, 0.4);
     box-shadow:
         inset 0 0 40px rgba(255, 165, 0, 0.2),
@@ -546,16 +674,20 @@ body {
 
 .detached-task {
     position: absolute;
-    padding: 10px 20px;
-    background: rgba(168, 85, 247, 0.2);
-    border: 1px solid var(--purple-accent);
-    border-radius: 21px;
+    padding: 10px 18px;
+    background: rgba(80, 40, 120, 0.25);
+    border: 2px dashed rgba(120, 70, 160, 0.6);
+    border-radius: 3px;
     font-size: 14px;
     font-weight: 500;
     color: var(--white);
-    animation: detachedFloat 5s ease-in-out infinite;
+    animation: none;
     transition: all 0.5s var(--ease-elastic);
     white-space: nowrap;
+    pointer-events: none;
+    box-shadow:
+        1px 1px 0 rgba(100, 60, 140, 0.3),
+        -1px -1px 0 rgba(80, 50, 80, 0.2);
 }
 
 .detached-task.being-captured {
@@ -606,7 +738,7 @@ body {
 
 .scene3-intro {
     position: absolute;
-    top: 60px;
+    top: 100px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 20px;
@@ -643,7 +775,7 @@ body {
 
 .calm-message {
     position: absolute;
-    bottom: 8%;
+    bottom: 14%;
     left: 50%;
     transform: translateX(-50%);
     text-align: center;
@@ -997,6 +1129,111 @@ body {
 }
 
 /* =============================================
+   SCENE 2 COMPLETION MESSAGE
+   ============================================= */
+
+#completion-message {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 50;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s var(--ease-soft);
+}
+
+#completion-message.hidden {
+    display: none;
+}
+
+#completion-message.visible {
+    opacity: 1;
+    display: block;
+}
+
+#completion-message p {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--white);
+    background: linear-gradient(90deg, var(--white) 0%, var(--amber) 50%, var(--purple-accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: textFadeIn 1s var(--ease-soft) forwards;
+    text-shadow: 0 0 40px rgba(255, 165, 0, 0.3);
+}
+
+@keyframes textFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============================================
+   ERASER BUTTON
+   ============================================= */
+
+.eraser-btn {
+    background: #666666 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.eraser-btn svg {
+    width: 20px;
+    height: 20px;
+    color: var(--white);
+}
+
+.eraser-btn.active {
+    background: #888888 !important;
+}
+
+/* =============================================
+   PAINT SCROLL ARROW (Scene 4)
+   ============================================= */
+
+#paint-scroll-arrow {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 100;
+    opacity: 0;
+    transition: opacity 0.5s var(--ease-soft);
+}
+
+#paint-scroll-arrow.visible {
+    opacity: 1;
+}
+
+#paint-scroll-arrow p {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--white);
+    opacity: 0.8;
+    margin-bottom: 12px;
+}
+
+#paint-scroll-arrow .scroll-arrow {
+    color: var(--amber);
+    width: 40px;
+    height: 40px;
+    animation: bounce 2s infinite, glowPulse 1.5s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px var(--amber));
+    cursor: pointer;
+}
+
+/* =============================================
    UTILITY CLASSES
    ============================================= */
 
@@ -1050,7 +1287,17 @@ body {
     }
 
     #easel-container {
-        left: 68%;
+        right: 5%;
+        transform: translateY(-50%) scale(0.85);
+    }
+
+    #preview-canvas {
+        width: 420px;
+        height: 320px;
+    }
+
+    #girl-container {
+        left: 12%;
     }
 }
 
@@ -1060,8 +1307,8 @@ body {
     }
 
     #girl-container {
-        left: 15%;
-        top: 28%;
+        left: 8%;
+        top: 22%;
     }
 
     #girl-image {
@@ -1069,12 +1316,22 @@ body {
     }
 
     #easel-container {
-        left: 65%;
-        top: 48%;
+        right: 3%;
+        transform: translateY(-50%) scale(0.7);
+    }
+
+    #preview-canvas {
+        width: 380px;
+        height: 280px;
     }
 
     #girl-calm-image {
         width: 450px;
+    }
+
+    #paint-prompt {
+        top: auto;
+        bottom: 12%;
     }
 }
 
@@ -1088,21 +1345,22 @@ body {
     }
 
     #girl-container {
-        left: 10%;
-        top: 30%;
+        left: 5%;
+        top: 28%;
     }
 
     #girl-image {
-        width: 80vw;
+        width: 70vw;
     }
 
     #easel-container {
-        left: 60%;
-        top: 50%;
+        right: 2%;
+        transform: translateY(-50%) scale(0.55);
     }
 
-    #easel {
-        transform: scale(0.8);
+    #preview-canvas {
+        width: 360px;
+        height: 270px;
     }
 
     #girl-calm-image {
@@ -1119,6 +1377,11 @@ body {
     .canvas-surface {
         width: 260px;
         height: 200px;
+    }
+
+    #paint-prompt {
+        top: auto;
+        bottom: 10%;
     }
 }
 
@@ -1191,10 +1454,38 @@ body {
 
     #paint-prompt {
         left: 5%;
+        right: 5%;
         bottom: 8%;
-        padding: 10px 18px;
-        font-size: 12px;
+        top: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
         z-index: 40;
+    }
+
+    .paint-prompt-text {
+        font-size: 12px;
+    }
+
+    .paint-prompt-arrow svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    #easel-container {
+        right: 2%;
+        left: auto;
+        transform: translateY(-50%) scale(0.45);
+    }
+
+    #preview-canvas {
+        width: 350px;
+        height: 260px;
+    }
+
+    #girl-container {
+        left: -5%;
+        top: 25%;
     }
 
     /* Floating tasks - reposition for mobile, below title */
@@ -1347,8 +1638,25 @@ body {
     }
 
     .scroll-arrow {
-        width: 24px;
-        height: 24px;
+        width: 30px;
+        height: 30px;
+    }
+
+    /* Eraser button on tablet */
+    .eraser-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .eraser-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    /* Completion message */
+    #completion-message p {
+        font-size: 22px;
+        padding: 0 20px;
     }
 }
 
@@ -1403,10 +1711,49 @@ body {
         left: 4%;
         right: 4%;
         bottom: 6%;
-        text-align: center;
-        padding: 8px 14px;
-        font-size: 10px;
+        top: auto;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
         z-index: 40;
+    }
+
+    .paint-prompt-text {
+        font-size: 10px;
+    }
+
+    .paint-prompt-arrow svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    #easel-container {
+        right: 1%;
+        left: auto;
+        transform: translateY(-50%) scale(0.38);
+    }
+
+    #preview-canvas {
+        width: 320px;
+        height: 240px;
+    }
+
+    #girl-container {
+        left: -12%;
+        top: 22%;
+    }
+
+    #paint-scroll-arrow {
+        bottom: 20px;
+    }
+
+    #paint-scroll-arrow p {
+        font-size: 12px;
+    }
+
+    #paint-scroll-arrow .scroll-arrow {
+        width: 32px;
+        height: 32px;
     }
 
     /* Floating tasks repositioned for small screens */
@@ -1590,13 +1937,30 @@ body {
     }
 
     .scroll-arrow {
-        width: 22px;
-        height: 22px;
+        width: 28px;
+        height: 28px;
     }
 
     /* Progress bar thicker on mobile for visibility */
     #progress-bar {
         height: 4px;
+    }
+
+    /* Eraser button on mobile */
+    .eraser-btn {
+        width: 34px;
+        height: 34px;
+    }
+
+    .eraser-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    /* Completion message on mobile */
+    #completion-message p {
+        font-size: 18px;
+        padding: 0 15px;
     }
 }
 
